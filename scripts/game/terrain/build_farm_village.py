@@ -8,9 +8,9 @@
     farm shelf has a ragged outline and a second step in the east, and the stream meanders except under the bridge.
   - Every placed thing keeps its height above the ground it stood on (units move with the new ground).
 
-    python scripts/terrain/build_farm_village.py            # writes the terrain and the scene, and a preview map;
+    python scripts/game/terrain/build_farm_village.py            # writes the terrain and the scene, and a preview map;
                                                             # once the scene has its terrain, only the terrain
-    python scripts/terrain/build_farm_village.py --dry-run  # only the preview map (scripts/terrain/out/farm_village_map.png)
+    python scripts/game/terrain/build_farm_village.py --dry-run  # only the preview map (scripts/game/terrain/out/farm_village_map.png)
 """
 
 import argparse

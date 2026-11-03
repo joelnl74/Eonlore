@@ -1,11 +1,11 @@
 """Add the Shrine Glade's opening quest to Oxygen/project/Assets/Scenes/ShrineGlade.hyscene (docs/TestBed.md, "Shrine
-Glade quest"): the "Quest Director" (ShrineQuestScript, Game/src/Scripts/QuestScripts.h) under "Directors", its
+Glade quest"): the "Quest Director" (ShrineQuestScript, Game/src/Scripts/ShrineGlade/ShrineQuestScript.h) under "Directors", its
 cutscene letterbox ("Cinematic Canvas") and the marker over the Old Monk ("Quest Marker Canvas"), and three dormant
 slimes on the lower path ("Slime Grounds 1" to "3" under "Characters" / "Slimes Lower Path") that the quest wakes.
 
-    python scripts/quests/build_shrine_quest.py
+    python scripts/game/quests/build_shrine_quest.py
 
-Run scripts/ui/build_game_ui.py field first (it builds the field UI the quest uses: the dialogue box and the
+Run scripts/game/ui/build_game_ui.py field first (it builds the field UI the quest uses: the dialogue box and the
 quest tracker), close the scene in the editor, then run this. Like the UI builder it removes what an earlier run
 added (by tag, with every descendant) and appends it again with IDs made from the tags, so it can be run as often
 as needed; everything else in the scene is left alone. The Sacred Tree's "Sacred Tree Awake" and "Sacred Tree

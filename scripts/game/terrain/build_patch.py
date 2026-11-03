@@ -1,7 +1,7 @@
 """Builds the TR0 test patch for one or more presets: the mesh (by material), the baked top texture and the
-fringe strip, into scripts/terrain/out/<preset>/. Render them with preview_blender.py.
+fringe strip, into scripts/game/terrain/out/<preset>/. Render them with preview_blender.py.
 
-    python scripts/terrain/build_patch.py [preset ...]      (default: bare conservative stronger tr1)
+    python scripts/game/terrain/build_patch.py [preset ...]      (default: bare conservative stronger tr1)
 
 Needs numpy and Pillow (not Blender)."""
 

@@ -6,7 +6,7 @@ high-resolution canvas) are anti-aliased and their page is imported with linear 
 alpha (the UI tints them).
 
 Usage:
-    python scripts/fonts/make_bmfont.py <font.ttf> --size 11 --out Oxygen/project/Assets/Fonts/PixelifySans11
+    python scripts/game/fonts/make_bmfont.py <font.ttf> --size 11 --out Oxygen/project/Assets/Fonts/PixelifySans11
         [--chars ascii,latin1,punctuation] [--padding 1] [--page-width 256] [--smooth]
 
 Writes <out>.fnt, <out>.png and, when they don't exist yet, <out>.png.hymeta (nearest filtering for a pixel font,

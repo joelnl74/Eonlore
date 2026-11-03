@@ -1,5 +1,5 @@
 """Checks the terrain rules (Terrain plan, "Shape" and "Surface") on the TR0 test patch and small cases.
-Run: python scripts/terrain/test_terrain.py   (numpy, Pillow; no Blender). The golden hashes are what the
+Run: python scripts/game/terrain/test_terrain.py   (numpy, Pillow; no Blender). The golden hashes are what the
 C++ port must reproduce."""
 
 import math

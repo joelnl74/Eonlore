@@ -3,9 +3,9 @@ upstairs (FarmVillageInnUpstairs.hyscene). Placeholder rooms of built-in boxes, 
 kit's textures, until the inn interior kit is modelled in Blender (see the wiki's Interiors page, docs/TestBed.md,
 "Interiors", and art_incoming/Inn-Interior-Art-Prompt.md).
 
-    python scripts/interiors/build_inn.py
+    python scripts/game/interiors/build_inn.py
 
-How interiors work (MvpScripts.h, ShrineScripts.h InteriorScript):
+How interiors work (FieldDirectorScript, Scripts/Interiors/InteriorScript.h):
   - "Door Inn" in the Farm Village opens FarmVillageInn (a door's scene is "<this scene><Name>", else "<Name>"):
     the village fades out and the inn is pushed on top, so the village waits exactly as it was left.
   - "Door Out" (at the room's open front) pops back to the village, at the inn's door.
@@ -19,7 +19,7 @@ How interiors work (MvpScripts.h, ShrineScripts.h InteriorScript):
 
 Writes the rooms' materials (Assets/Interiors/Materials, the kit's textures at 32 texels per metre) and render
 profiles (Assets/Interiors/RenderProfiles) when they are missing, then the scenes, then the field UI into each
-(scripts/ui/build_game_ui.py: inventory, dialogue, prompt, fade). Every handle and entity ID comes from a name, so
+(scripts/game/ui/build_game_ui.py: inventory, dialogue, prompt, fade). Every handle and entity ID comes from a name, so
 reruns give the same files. Close the scenes in the editor first. Needs PyYAML.
 
 Coordinates: X east (right on screen), Y north (up the screen, away from the camera), Z up; each floor is z = 0 in
@@ -510,7 +510,7 @@ def directors(b, room_name):
               "RoomName": room_name, "TiltDegrees": 52, "FieldOfView": 30, "FocusLead": 0.6, "FocusRise": 0.8,
               "BoundsMin": [-1.5, -1.2], "BoundsMax": [1.5, 1.2], "StartPreset": 1}}]})
     b.add("MVP Director", group, TransformComponent=transform(),
-          NativeScriptComponent={"Scripts": [{"Name": "MvpDirectorScript", "Properties": {
+          NativeScriptComponent={"Scripts": [{"Name": "FieldDirectorScript", "Properties": {
               "ArriveTime": 0.6, "CloseRange": 0.6, "EyeHeight": 1, "FacingDegrees": 80, "InteractRange": 1.7, "ItemHeight": 0.6,
               "LeaveTime": 0.6, "MaxReachHeight": 1, "MessageTime": 3, "RestTime": 1.2, "SwitchMargin": 0.3}}]})
 

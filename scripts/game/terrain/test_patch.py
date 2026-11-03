@@ -19,7 +19,7 @@ import numpy as np
 from terrain_mesher import RAMP_NORTH, Settings, Terrain
 from splat import Layer, SplatSettings
 
-REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 GROUND = os.path.join(REPO, "Oxygen", "project", "Assets", "Textures", "Ground")
 
 SIZE_M = 20.0

@@ -1,9 +1,9 @@
 """Renders the TR0 test patch (built by build_patch.py) at the Farm Village's game camera.
 
-    blender --background --python scripts/terrain/preview_blender.py -- [preset ...] [--views game,close,west]
-    python scripts/terrain/preview_blender.py [preset ...]          (with the pip 'bpy' module)
+    blender --background --python scripts/game/terrain/preview_blender.py -- [preset ...] [--views game,close,west]
+    python scripts/game/terrain/preview_blender.py [preset ...]          (with the pip 'bpy' module)
 
-Writes scripts/terrain/out/<preset>/<view>.png. Camera: the Farm Village's framing (55 degrees from straight
+Writes scripts/game/terrain/out/<preset>/<view>.png. Camera: the Farm Village's framing (55 degrees from straight
 down, 30 degree vertical field of view, 12 m visible at the focus). Light: its sun and the Golden render
 profile's ambient, forward-lit like Hydro (direct light only, no bounces). Textures nearest-filtered."""
 

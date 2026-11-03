@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """A rough offline preview of Battle.hyscene through the battle's stage camera (not the engine's renderer).
 
-    python scripts/battle/preview.py [out.png]
+    python scripts/game/battle/preview.py [out.png]
 
 It ray-casts the flat floor meshes and the backdrop with their materials' textures, stands the sprites up as
 billboards (sorted far to near), draws the GLB props as simple stand-ins, darkens everything towards the scene's
@@ -22,7 +22,7 @@ from PIL import Image, ImageDraw
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from stage import StageCamera  # noqa: E402
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 ASSETS = ROOT / "Oxygen" / "project" / "Assets"
 WIDTH, HEIGHT = 1280, 720
 

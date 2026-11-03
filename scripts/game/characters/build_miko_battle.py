@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Builds Miko's battle sheet (Characters/Player/Miko/Miko.png + Miko.hyanim) from PixelLab exports.
 
-    python scripts/characters/build_miko_battle.py --field-idle DIR --field-walk DIR --battle DIR --out DIR [--preview PNG]
+    python scripts/game/characters/build_miko_battle.py --field-idle DIR --field-walk DIR --battle DIR --out DIR [--preview PNG]
 
 --field-idle / --field-walk: the field Idle and walking character exports, unzipped (as build_miko_field.py takes).
 --battle: a folder holding the battle "spritesheet" exports unzipped one per sub-folder, named battle_idle, punch,
 combo (the two-punch combo), spin_kick and death (each a <name>.png + <name>.json, west-facing rows).
 
-The layout stays the one BattleScript and scripts/battle/build_arena.py expect: 96 x 96 cells, pivot at the cell
+The layout stays the one BattleScript and scripts/game/battle/build_arena.py expect: 96 x 96 cells, pivot at the cell
 centre, the feet 15 px above the cell's bottom (HeroFoot = 15 / 96), drawn at 2.4 m (HERO_SIZE), sprite names
 Miko_<row * 8 + column>, the battle stance first frame Miko_64. Rows: 0 Idle (field, facing the camera), 1 WalkDown,
 2 WalkRight, 3 WalkUp, 4 WalkLeft (field walks; the battle uses Left and Right), 5 Kick, 6 Punch, 7 Death,
