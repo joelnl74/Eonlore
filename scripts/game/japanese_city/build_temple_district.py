@@ -21,17 +21,22 @@ the path sides and darker / lighter grass patches against the tiling (art_incomi
 gen_temple_tex.py from the field grass).
 
 Townsfolk: pilgrims going up to pray (routes, NpcRouteScript), a monk sweeping the stair, a monk at the gate who
-talks ("Npc TempleMonk"). The camera fades what stands in front of Miko (OccluderFadeScript).
+talks ("Npc TempleMonk"). The camera fades what stands in front of Miko (OccluderFadeScript; meshes to 0.15, Nov 3: at
+0.3 the gate's roof still lay grey over the komainu behind it).
 
 Trees and shrubs: the delivered Japanese set (Nov 2, PixelLab: black pines, red and orange maples, bamboo, nine garden
 shrubs), installed into Sprites/Trees and Sprites/Plants by install_jp_trees.py; the field set stands in for any that
 are missing. Each tree comes at two sizes: the prompts' (a 3.6 m pine) and "_Large", the full image read at 32 px/m (a
 7 m pine), for the landmark pines and the hill's forest.
 
+Nov 3 (towards a 9): wind in the bamboo and maples (sway groups, SWAY), falling red, orange and bamboo leaves and the
+basin's trickle (the "Life" group), the vignette in the three temple profiles (VIGNETTE), the user's komainu pair at
+the hall steps, and a small kit torii before the wayside shrine.
+
 Rewrites the scene on every run (don't edit it in the editor). Uses build_city_slice's Slice (its kit, materials,
 helpers). Close the scene in Oxygen first. Check: Oxygen --scene TempleDistrict --play --frames 150 --capture out.png
 
-    python scripts/japanese_city/build_temple_district.py [--profile Day|Dusk|Night] [--start lane|stair|gate|hall]
+    python scripts/game/japanese_city/build_temple_district.py [--profile Day|Dusk|Night] [--start lane|stair|gate|hall]
 """
 
 import argparse
@@ -42,7 +47,8 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-import build_city_slice as sl  # noqa: E402  (Slice, its materials and helpers; sets kit.KEY, reset below)
+import build_city_slice as sl  # noqa: E402
+import look  # noqa: E402  (scripts/game/look.py; build_city_slice puts scripts/game on the path)  (Slice, its materials and helpers; sets kit.KEY, reset below)
 
 kit, city = sl.kit, sl.city
 kit.KEY = "JP_Temple:"
@@ -63,7 +69,11 @@ Y_HALL = 31.0                           # the hall podium's front (its own steps
 # pool about 3 m across on the ground round it at dusk instead of a faint glow on the lantern only (Nov 2; at 1.15 and
 # 4.2 m the pool lifted the paving only 13 % under the dusk sun, now also lowered from 1.15 to 1.0)
 STONE_LIGHT_Z = 0.95
-X_TEMIZUYA, Y_TEMIZUYA = -9.4, -7.4     # the hand-washing pavilion (its front, turned to face +Y)
+# the user's composition (Nov 2, 09:20, made in the editor and kept here): the hand-washing pavilion at the left of the
+# stair foot facing the court (as at most shrines: you wash before you climb), the omikuji and ema racks mirrored on
+# the right of the stair foot, the tea bench in the west corner by the young maple
+X_TEMIZUYA, Y_TEMIZUYA = -8.43, 0.45    # the pavilion's front (it faces -Y, the court)
+X_OMIKUJI, Y_OMIKUJI = 4.75, 3.15
 Y_BURNER = 21.0                         # the incense burner on the approach between the gate and the hall steps
 X_PRECINCT = 30.25                      # the plaster walls closing the gate terrace's sides
 X_HALL_WALL = 17.75                     # the plaster walls along the hall terrace's sides (its back wall at y 45.6)
@@ -90,6 +100,18 @@ TREE = {
 }
 VARIANTS = {"maple_young": "ABCD", "pine_young": "ABCD", "bamboo_young": "ABCDEFGH"}
 SHRUB_VARIANT = 0.4     # how often a shrub uses the second delivery's version (_V2)
+# wind (Nov 3): the trees of each kind stand under a group per terrace that sways them (FoliageSwayScript), the tall
+# ones less: kind -> (group, degrees, seconds of one sway, gust); pines are stiff and stay still
+SWAY = {"bamboo": ("Swaying Bamboo", 1.6, 4.2, 0.6), "maple_young": ("Swaying Young Maples", 2.4, 3.2, 0.5),
+        "maple": ("Swaying Maples", 1.0, 5.0, 0.5)}
+# the vignette per time of day (Nov 3, as the shrine glade's): intensity, radius, softness
+VIGNETTE = {"Day": (0.3, 0.45, 0.6), "Dusk": (0.5, 0.42, 0.6), "Night": (0.6, 0.38, 0.6)}
+EFFECTS = os.path.join(ASSETS, "Sprites", "Effects")   # the user's leaf sprites (Nov 2 / 3)
+# entities the user moved in Oxygen whose place the builder draws at random (Nov 3, 11:19): tag -> (x, y) of its
+# Translation; main() applies them after the build and says if one is not found (the tags count up, so an edit above
+# them can shift the numbers: check the diff, bin-int/claude_td_semdiff.py)
+USER_PLACED = {"Decal 576": (-17.1824379, 18.9640255)}     # a leaf decal under the young maple left of the gate
+RED, ORANGE = (1.0, 0.5, 0.4), (1.0, 0.64, 0.36)       # the pink leaf tinted to the maples' reds
 
 
 LOOK = {}      # build() fills it: the decal materials tree() and planted() use, and the random generator
@@ -109,8 +131,7 @@ def temple_material(name, w_px, h_px, cutoff=0.5, tint=(1, 1, 1)):
     tex = kit.handle_of(png + ".hymeta")
     mat = os.path.join(city.MAT_DIR, name + ".hymat")
     h = kit.handle_of(mat) if os.path.exists(mat) else city.stable_handle("mat:" + name)
-    with open(mat, "w", newline="\r\n") as f:
-        f.write("Handle: %d\nMaterial:\n  Type: Standard\n  AlbedoHandle: %d\n  Tint: [%g, %g, %g, 1]\n  Tiling: [%g, %g]\n"
+    city.write_material(mat, "Handle: %d\nMaterial:\n  Type: Standard\n  AlbedoHandle: %d\n  Tint: [%g, %g, %g, 1]\n  Tiling: [%g, %g]\n"
                 "  EmissionColor: [0, 0, 0]\n  EmissionIntensity: 1\n  AlphaCutoff: %g\n  Filter: Nearest\n"
                 % (h, tex, tint[0], tint[1], tint[2], 32.0 / w_px, 32.0 / h_px, cutoff))
     return h
@@ -131,6 +152,8 @@ def temple_profiles(city_handles):
         src = open(os.path.join(sl.CITY_PROFILES, k + ".hyrender")).read().splitlines()
         dst = os.path.join(TEMPLE_PROFILES, k + ".hyrender")
         h = kit.handle_of(dst) if os.path.exists(dst) else city.stable_handle("profile:Temple" + k)
+        vals = dict(vals, **dict(zip(("VignetteIntensity", "VignetteRadius", "VignetteSoftness"),
+                                     ("%g" % v for v in VIGNETTE[k]))))
         out = []
         for line in src:
             key = line.strip().split(":")[0]
@@ -139,8 +162,11 @@ def temple_profiles(city_handles):
             elif key in vals:
                 line = line[: line.index(key)] + key + ": " + vals[key]
             out.append(line)
+        for key in ("VignetteIntensity", "VignetteRadius", "VignetteSoftness"):    # the PostProcess map is the last
+            if any(line.strip().startswith(key + ":") for line in out) is False:
+                out.append("    %s: %s" % (key, vals[key]))
         with open(dst, "w", newline="\r\n") as f:
-            f.write("\n".join(out) + "\n")
+            f.write(look.apply("\n".join(out) + "\n", k))      # the shared vignette and grade (Nov 3)
         handles[k] = h
     return handles
 
@@ -175,12 +201,103 @@ def tree(c, parent, kind, x, y, z, scale=1.0, flip=False, ground=None):
         for k in range(2):
             c.decal(parent, LOOK["leaves"], x + rnd.uniform(-1.6, 1.6), y + rnd.uniform(-1.4, 0.6), 4.0, 4.0,
                     (z if ground is None else ground) + 0.04 + k * 0.004, rnd.uniform(0, 360))
+    card_parent = sway_group(c, parent, kind)
     png = os.path.join(sl.TREES, name + ".png")
     if os.path.exists(png + ".hymeta"):
-        sprite_card(c, parent, png, x, y, z, scale=scale, flip=flip, shadow=0.5)
+        sprite_card(c, card_parent, png, x, y, z, scale=scale, flip=flip, shadow=0.5)
     else:
-        sprite_card(c, parent, os.path.join(sl.TREES, stand_in + ".png"), x, y, z, color=tint, scale=scale / base, flip=flip,
+        sprite_card(c, card_parent, os.path.join(sl.TREES, stand_in + ".png"), x, y, z, color=tint, scale=scale / base, flip=flip,
                     shadow=0.5)
+
+
+def sway_group(c, parent, kind):
+    """The group under `parent` that sways trees of `kind` (made the first time; only the cards go in it, the leaf
+    decals at their feet stay put), or `parent` for a tree that doesn't sway."""
+    cls = "bamboo" if kind.startswith("bamboo") else kind if kind in SWAY else "maple" if kind.startswith("maple") else None
+    if cls is None or "sway" not in LOOK:
+        return parent
+    key = "sway:%s:%s" % (parent, cls)
+    if key not in LOOK["sway"]:
+        name, degrees, period, gust = SWAY[cls]
+        c.w.entity(key, name, parent=parent, body=(
+            "    NativeScriptComponent:\n      Scripts:\n        - Name: FoliageSwayScript\n          Properties:\n"
+            "            Degrees: %g\n            Period: %g\n            Gust: %g\n" % (degrees, period, gust)))
+        LOOK["sway"][key] = True
+    return key
+
+
+def particle_body(**kw):
+    """A ParticleEmitter2DComponent (EntitySerializer's keys, as the shrine glade pass writes them); kw overrides the
+    defaults below."""
+    p = dict(PlayOnStart="true", Looping="true", Duration=4, Rate=1.0, BurstCount=0, MaxParticles=8, Seed=0, Shape="Box",
+             ShapeSize=(4, 2), Lifetime=(3.5, 6.5), Speed=(0.05, 0.3), Direction=90, Spread=180, StartSize=(0.15, 0.24),
+             StartRotation=(0, 0), AngularVelocity=(0, 0), EndSizeScale=0.5, StartColor=(1, 1, 1, 1), EndColor=(1, 1, 1, 0),
+             Gravity=(0, 0), Drag=0.5, Turbulence=0.9, TextureHandle=None, SpriteIndex=0, Blend="Alpha", Lighting="Lit",
+             Space="View", SortOrder=2, EmissionIntensity=0, LightRadius=0, LightIntensity=1, MaxLights=0,
+             DestroyWhenFinished="false")
+    p.update(kw)
+    out = "    ParticleEmitter2DComponent:\n"
+    for k, v in p.items():
+        if v is None:
+            continue
+        if isinstance(v, (tuple, list)):
+            v = "[%s]" % ", ".join("%g" % x for x in v)
+        elif isinstance(v, float):
+            v = "%g" % v
+        out += "      %s: %s\n" % (k, v)
+    return out
+
+
+def life(c):
+    """Falling leaves and the basin's trickle (Nov 3): clouds facing the camera, low and in front of each tree's card
+    (inside a canopy the card hides them), each leaf turning as it falls; the red and orange maple leaves are the
+    user's pink leaf tinted, the bamboo's the green leaf sheet (4 x 4)."""
+    L = c.group("Life")
+
+    def handle(name):
+        meta = os.path.join(EFFECTS, name + ".png.hymeta")
+        return kit.handle_of(meta) if os.path.exists(meta) else None
+
+    pink, green = handle("FX_Leaf_Pink"), handle("FX_Leaves_Green")
+
+    def leaves(tag, x, y, z, size, rate, most, texture, index=0, tint=(1.0, 1.0, 1.0)):
+        if texture is None:
+            c.d.missing.append(tag)
+            return
+        c.w.entity("life:" + tag, tag, parent=L, t=(x, y, z), body=particle_body(
+            Rate=rate, MaxParticles=most, ShapeSize=size, Lifetime=(4.0, 7.0), Speed=(0.25, 0.5), Direction=265,
+            Spread=25, StartSize=(0.32, 0.375), StartRotation=(0, 360), AngularVelocity=(-120, 120), EndSizeScale=1.0,
+            StartColor=tint + (1.0,), EndColor=tint + (0.0,), Gravity=(-0.06, -0.2), Drag=0.4, Turbulence=0.9,
+            TextureHandle=texture, SpriteIndex=index))
+    # tag, the cloud (1.5 m in front of the tree's foot, about 3 m up), its size, per second, at most, colour
+    for (tag, x, y, z, size, rate, most, tint) in (
+            ("Leaves Forecourt Maple", 16.5, -0.5, ZF + 3.0, (2.6, 0.6), 0.5, 6, RED),
+            ("Leaves Terrace Maple", 8.0, 7.0, ZS + 3.2, (3.0, 0.6), 0.6, 7, RED),
+            ("Leaves Gate Maple", 10.5, 19.0, ZG + 3.2, (3.0, 0.6), 0.6, 7, ORANGE),
+            ("Leaves Gate Maple West", -27.0, 18.0, ZG + 3.0, (2.6, 0.6), 0.4, 5, RED),
+            ("Leaves Gate Maple East", 27.0, 17.5, ZG + 3.0, (2.6, 0.6), 0.4, 5, ORANGE),
+            ("Leaves Hall Maple", 13.5, 31.5, ZH + 4.0, (3.5, 0.8), 0.6, 7, RED)):
+        leaves(tag, x, y, z, size, rate, most, pink, tint=tint)
+    leaves("Leaves Bamboo Grove", -25.0, 37.5, ZG + 3.5, (5.0, 1.0), 0.6, 7, green, 1)
+    leaves("Leaves Bamboo Grove 2", -23.0, 40.0, ZG + 3.0, (3.0, 0.8), 0.5, 6, green, 6)
+    # the basin's trickle: drops from the bamboo spout's mouth (the kit's temizuya: (0.35, 1.13, 0.98) from its
+    # origin) into the water 0.2 m below, pale and quick
+    c.w.entity("life:Basin Trickle", "Basin Trickle", parent=L, t=(X_TEMIZUYA + 0.35, Y_TEMIZUYA + 1.13, ZF + 0.96),
+               body=particle_body(Rate=9.0, MaxParticles=4, ShapeSize=(0.03, 0.02), Lifetime=(0.18, 0.24), Speed=(1.0, 1.2),
+                                  Direction=270, Spread=4, StartSize=(0.035, 0.05), EndSizeScale=0.8,
+                                  StartColor=(0.82, 0.92, 1.0, 0.9), EndColor=(0.82, 0.92, 1.0, 0.5), Gravity=(0, -1.5),
+                                  Drag=0.0, Turbulence=0.0, EmissionIntensity=0.4, SortOrder=3))
+
+
+def inari_torii(c, parent):
+    """A small vermilion torii (the kit's shrine torii at half size: 2.3 m) before the wayside shrine in the forecourt's
+    west corner (Nov 3), as the small Inari shrines in temple grounds have; no collider (the posts are thin)."""
+    glb = os.path.join(city.MODELS, "JP_Shrine_Torii_A.glb")
+    if os.path.exists(glb) is False:
+        c.d.missing.append("JP_Shrine_Torii_A")
+        return
+    c.w.entity("model:Inari Torii", "Inari Torii", parent=parent, t=(-19.2, 1.75, ZF), s=(0.5, 0.5, 0.5),
+               body=kit.mesh_body(kit.ensure_mesh_meta(glb), False))
 
 
 def shrub(c, parent, kinds, x, y, z, rnd):
@@ -283,7 +400,7 @@ def build(c, args):
                 creep=temple_material("JP_Decal_GrassCreep", 256, 16),
                 patches=(temple_material("JP_Decal_GrassPatch_Dark", 128, 128), temple_material("JP_Decal_GrassPatch_Light", 128, 128)),
                 leaves=sl.step_material("JP_Decal_MapleLeaves", 128, 128)[0], dirt=temple_material("JP_Decal_DirtPatch_C", 72, 72),
-                earth=earth)
+                earth=earth, sway={})
 
     # ---------------------------------------------------------------- ground and terraces
     G = c.group("Ground")
@@ -347,15 +464,17 @@ def build(c, args):
         c.model(F, "JP_Rich_CompoundWall_4m_A", -22.25, y, ZF, 90.0)
     for y in (-10.0, -7.0, 3.0):
         c.model(F, "JP_Rich_CompoundWall_4m_A", 22.25, y, ZF, 90.0)
-    # the hand-washing pavilion (temizuya) at the front left, turned so worshippers stand behind its basin facing the
-    # camera; a water jar beside it, a bench across the court (Nov 2: a 3D pavilion instead of the kakehi card)
-    c.building(F, "JP_Temple_Temizuya_A", X_TEMIZUYA, Y_TEMIZUYA, ZF, 180.0)
-    c.model(F, "Props/JP_Prop_WaterJar_A", X_TEMIZUYA - 2.4, -9.0, ZF)
-    c.model(F, "Props/JP_Prop_TeaBench_A", 9.5, -8.4, ZF)
-    # where bad fortunes are tied (omikuji rack with its offering box) and the plaque rack beside it
-    c.model(F, "Modules/JP_Temple_OmikujiRack_A", 13.6, -4.4, ZF)
-    sl.prop_card(c, F, "JP_Temple_EmaRack_A", 10.9, -4.2, ZF, scale=0.8, sort=1)
+    # the hand-washing pavilion (temizuya) at the left of the stair foot, a water jar beside it; the bench in the west
+    # corner (Nov 2: a 3D pavilion instead of the kakehi card; placed by the user)
+    c.building(F, "JP_Temple_Temizuya_A", X_TEMIZUYA, Y_TEMIZUYA, ZF)
+    c.model(F, "Props/JP_Prop_WaterJar_A", -10.43, 1.93, ZF)
+    c.model(F, "Props/JP_Prop_TeaBench_A", -18.62, -6.61, ZF)
+    # where bad fortunes are tied (omikuji rack with its offering box) and the plaque rack beside it, at the right of
+    # the stair foot
+    c.model(F, "Modules/JP_Temple_OmikujiRack_A", X_OMIKUJI, Y_OMIKUJI, ZF)
+    sl.prop_card(c, F, "JP_Temple_EmaRack_A", 8.02, 3.27, ZF, scale=0.8, sort=1)
     sl.prop_card(c, F, "JP_Temple_Hokora_A", -19.2, 2.6, ZF, scale=0.8, sort=1)        # a small wayside shrine
+    inari_torii(c, F)
     for (x, y) in ((-6.0, -6.0), (6.0, -6.0), (-6.0, 0.0), (6.0, 0.0)):        # stone lanterns along the path
         c.model(F, "Props/JP_Prop_StoneLantern_A", x, y, ZF)
         d.lantern(F, x, y, ZF + STONE_LIGHT_Z, 1.7, 4.6)
@@ -409,7 +528,7 @@ def build(c, args):
     # the pagoda (left) and the bell tower (right), clear of the hall terrace's walls (x +-18)
     c.model(P, "Props/JP_Prop_IncenseBurner_A", 0.0, Y_BURNER, ZG)                # the incense burner (jokoro)
     d.lantern(P, 0.0, Y_BURNER, ZG + 1.0, 0.5, 2.0, kind="Lantern Embers")
-    c.building(P, "JP_Temple_Pagoda_A", -23.5, 28.0, ZG)
+    c.building(P, "JP_Temple_Pagoda_A", -23.5, 30.0, ZG)       # three tiers on a 9.6 m podium (rebuilt Nov 2)
     c.building(P, "JP_Temple_BellTower_A", 23.0, 27.0, ZG)
     for (x, y) in ((-20.0, 24.5), (-27.0, 24.5), (20.4, 24.4), (25.6, 24.4)):   # stone lanterns in front of both
         c.model(P, "Props/JP_Prop_StoneLantern_A", x, y, ZG)
@@ -419,19 +538,24 @@ def build(c, args):
     tree(c, P, "maple_young", 16.5, 22.0, ZG, 1.15)
     for s_ in (-1, 1):                                       # young pines either side of the hall steps
         tree(c, P, "pine_young", s_ * 4.3, 24.4, ZG, 1.0, flip=s_ > 0)
-        # the guardian lion-dogs (komainu) facing each other across the foot of the hall steps
-        # (props_r1 sprites, cut from the Nov 2 temple prop sheet at about 40 px/m: drawn at 0.8; prop_card installs the
-        # sprite, the mirrored one reuses it)
-        if s_ < 0:
+        # the guardian lion-dogs (komainu) facing each other across the foot of the hall steps: the user's pair (Nov 3,
+        # as at the shrine glade), drawn as a left one facing right (A) and a right one facing left (B), so neither is
+        # flipped; at 0.8 (1.45 m, the old sprite's height); the old JP_Temple_Komainu_A stands in if they are missing
+        pair = os.path.join(kit.SPRITES, "JP_Shrine_Komainu_%s.png" % ("A" if s_ < 0 else "B"))
+        if os.path.exists(pair + ".hymeta"):
+            sprite_card(c, P, pair, s_ * 3.25, 23.2, ZG, scale=0.8, sort=1, shadow=0.5, tag="Komainu %s" % ("A" if s_ < 0 else "B"))
+        elif s_ < 0:
             sl.prop_card(c, P, "JP_Temple_Komainu_A", s_ * 3.25, 23.2, ZG, scale=0.8, sort=1, shadow=0.5)
         else:
             sprite_card(c, P, os.path.join(kit.SPRITES, "JP_Temple_Komainu_A.png"), s_ * 3.25, 23.2, ZG, scale=0.8, flip=True,
                         sort=1, shadow=0.5)
-    # the sacred pine (shinboku) with its rope and paper streamers, in a stone bed with a bench before it (drawn 1:1)
-    top = sl.tree_bed(c, P, ishi, LOOK["earth"], -7.6, 25.4, ZG, 3.2, 2.2, rnd=rnd)
-    sl.prop_card(c, P, "JP_Temple_SacredPine_A", -7.6, 25.4, top, scale=1.0, sort=0, shadow=0.5)
-    c.model(P, "Props/JP_Prop_BenchMat_A", -7.6, 23.6, ZG)
-    tree(c, P, "pine_small", -16.5, 21.5, ZG, 1.0, flip=True)
+    # the sacred pine (shinboku) with its rope and paper streamers, a stone bed and a bench before it (drawn 1:1)
+    # (Nov 3, 11:19: the user moved the pine 2 m back, behind its bed, onto the terrace; the bench back 0.24 m and the
+    # small pine on the left 1.2 m back; ported here)
+    sl.tree_bed(c, P, ishi, LOOK["earth"], -7.6, 25.4, ZG, 3.2, 2.2, rnd=rnd)
+    sl.prop_card(c, P, "JP_Temple_SacredPine_A", -7.722, 27.442, ZG + 0.113, scale=1.0, sort=0, shadow=0.5)
+    c.model(P, "Props/JP_Prop_BenchMat_A", -7.6, 23.838, ZG)
+    tree(c, P, "pine_small", -16.5, 22.719, ZG, 1.0, flip=True)
     for (x, y, sc) in ((-27.5, 39.0, 1.2), (-25.0, 42.5, 1.1), (-28.5, 44.0, 1.25), (-21.0, 43.5, 1.0)):   # bamboo grove
         tree(c, P, "bamboo" if sc > 1.1 else "bamboo_b", x, y, ZG, sc * 0.85, flip=sc < 1.1)
     for (x, y) in ((-23.6, 40.6), (-29.2, 41.2), (-26.2, 45.2), (-22.8, 45.6), (-29.6, 37.4)):   # young bamboo round it
@@ -440,7 +564,7 @@ def build(c, args):
                                  ("pine", 26.5, 36.0, 1.25, False), ("maple_young", 21.0, 39.5, 1.15, True), ("pine_small", 28.0, 42.5, 1.0, False),
                                  ("maple_young", -17.5, 18.0, 1.1, False), ("maple_young", 18.5, 33.5, 1.1, True)):
         tree(c, P, kind, x, y, ZG, sc, flip=fl)
-    for (x, y) in ((-22.0, 19.0), (22.5, 19.5), (-29.0, 31.0), (19.5, 34.5), (-19.0, 35.0), (27.5, 31.0)):
+    for (x, y) in ((-22.0, 19.0), (22.5, 19.5), (-29.0, 31.0), (19.5, 34.5), (-20.0, 36.4), (27.5, 31.0)):
         shrub(c, P, ("Azalea_B", "Hedge", "Camellia"), x, y, ZG, rnd)
         shrub(c, P, ("Azalea_A", "Sasa", "Nandina"), x + 1.1, y - 0.4, ZG, rnd)
 
@@ -531,7 +655,7 @@ def build(c, args):
     # on each side of it), pray at the hall, and back
     def pilgrim(side, dx):
         return [(19.0, -2.0 + dx * 0.5, ZF),
-                dict(at=(X_TEMIZUYA - 0.6 + dx, Y_TEMIZUYA + 0.6, ZF), wait=(3.0, 5.0), facing="Down"),   # washing hands
+                dict(at=(X_TEMIZUYA - 0.6 + dx, Y_TEMIZUYA - 0.6, ZF), wait=(3.0, 5.0), facing="Up"),     # washing hands
                 (-1.0 + dx, Y_STAIR0 - 0.6, ZF), (-1.0 + dx, Y_STAIR1, ZG), (side * 1.3, Y_GATE + 3.0, ZG),
                 dict(at=(side * 1.05, Y_BURNER, ZG), wait=(3.0, 6.0), facing="Left" if side > 0 else "Right"),
                 (side * 1.3, Y_BURNER + 1.5, ZG), (-0.8 + dx, Y_HALL_STEPS0 - 0.2, ZG), (-0.8 + dx, Y_HALL_STEPS1 + 0.2, ZH),
@@ -541,8 +665,8 @@ def build(c, args):
     walk2 = c.route(W, "PilgrimB", pilgrim(1, 1.2))
     c.route_walker(W, "OldWoman", walk2, "PingPong", 0.5, start=5, delay=6.0)
     walk3 = c.route(W, "Visitor", [(19.0, -1.0, ZF), dict(at=(12.6, 1.6, ZF), wait=(4.0, 7.0), facing="Up"),   # the notices
-                                   dict(at=(13.2, -5.1, ZF), wait=(4.0, 7.0), facing="Up", chance=0.8),        # ties a slip
-                                   dict(at=(9.0, -7.4, ZF), wait=(5.0, 9.0), facing="Down", chance=0.7),       # the bench
+                                   dict(at=(X_OMIKUJI - 0.4, Y_OMIKUJI - 0.7, ZF), wait=(4.0, 7.0), facing="Up", chance=0.8),  # ties a slip
+                                   dict(at=(-17.8, -5.9, ZF), wait=(5.0, 9.0), facing="Down", chance=0.7),     # the bench
                                    (2.0, -9.0, ZF)])
     c.route_walker(W, "Merchant", walk3, "Loop", 0.9, start=1, delay=4.0)
 
@@ -577,6 +701,25 @@ def build(c, args):
            pan_min=(-0.5, -4.0), pan_max=(0.5, 3.0), blend=1.4)
     c.zone(Zg, "Gate", 0.0, 27.0, (34.0, 24.0), tilt=73, fov=30, scale=0.95, lead=2.0, rise=3.4,
            pan_min=(-6.0, -8.0), pan_max=(6.0, 2.0), blend=1.4)
+    # between the gate and the hall steps (Nov 3): steeper (52 degrees from straight down, 73 elsewhere) and looking
+    # 6 m ahead, so the hall and its steps fill the frame and the gate she has just walked through sinks to the
+    # frame's bottom instead of fading across the komainu (tried 62 / 55 / 50 with leads 4.5 to 7: rv_td25_*.png)
+    c.zone(Zg, "Hall Approach", 0.0, 22.6, (14.0, 8.0), priority=2, tilt=52, fov=30, scale=0.95, lead=6.0, rise=3.2,
+           pan_min=(-3.0, -1.0), pan_max=(3.0, 1.0), blend=1.2)
+    life(c)
+
+
+def place_user_edits(lines):
+    """Moves the USER_PLACED entities to where the user put them (x and y of the Translation; z as built)."""
+    for tag, (x, y) in USER_PLACED.items():
+        try:
+            i = lines.index("      Tag: %s" % tag)
+        except ValueError:
+            print("user edit not applied (no entity tagged %r)" % tag)
+            continue
+        j = next(k for k in range(i, len(lines)) if lines[k].startswith("      Translation: "))
+        z = lines[j].split("[", 1)[1].rstrip("]").split(",")[2].strip()
+        lines[j] = "      Translation: [%s, %s, %s]" % ("%g" % x, "%g" % y, z)
 
 
 def main():
@@ -601,7 +744,7 @@ def main():
         "      PerspectiveFar: 300\n      OrthographicSize: 13\n      OrthographicNear: -1\n      OrthographicFar: 1\n      FocusDistance: 0\n"
         "    NativeScriptComponent:\n      Scripts:\n        - Name: CameraFollowScript\n          Properties:\n"
         "            Bounds: [60, 60]\n            LookAhead: 0.5\n            Smoothing: 6\n"
-        "        - Name: OccluderFadeScript\n          Properties:\n            Target: %d\n            FadedOpacity: 0.3\n"
+        "        - Name: OccluderFadeScript\n          Properties:\n            Target: %d\n            FadedOpacity: 0.15\n"
         "            SpriteFadedOpacity: 0.12\n            FadeSpeed: 4\n            Radius: 0.3\n            HeadHeight: 1.5\n"
         "            MaxSize: 30\n" % kit.stable_id("Player")))
     w.entity("Director", "Temple Director", body=(
@@ -626,6 +769,7 @@ def main():
         "    DirectionalLightComponent:\n      Color: [1, 0.82, 0.64]\n      Intensity: 1.0\n      IsMainLight: true\n      CastShadows: true\n"
         "      ShadowStrength: 0.9\n      ShadowDistance: 55\n      ShadowBias: 1\n"))
     build(c, args)
+    place_user_edits(w.lines)
     header = (
         "Handle: %d\nScene: TempleDistrict\nRenderSettings:\n  OverrideProject: true\n  Features:\n    Depth: Shared\n"
         "    SpriteSorting: ViewDepth\n    Lighting: Forward\n    DefaultSpriteAlpha: Cutout\n    Meshes: true\n    Shadows: Sun\n"

@@ -13,9 +13,9 @@
     scene builder placed: Jokai and Sanzo at the camp, Genji and Okiku at the farm, the fox shrine's voice) and the script ("Side Quests").
   - Where the player arrives from the Shrine Glade ("Arrive ShrineGlade", on the landing halfway up the mountain).
 
-    python scripts/quests/build_countryside_quest.py
+    python scripts/game/quests/build_countryside_quest.py
 
-scripts/japanese_city/build_countryside.py runs it after writing the scene (and the field UI, which the quest uses:
+scripts/game/japanese_city/build_countryside.py runs it after writing the scene (and the field UI, which the quest uses:
 the dialogue box, the quest tracker, the menu). On its own: close the scene in the editor, then run it. Like the UI
 builder it removes what an earlier run added (by tag, with every descendant) and appends it again with IDs made from
 the tags, so it can be run as often as needed. Heights come from the scene builder's ground_z.

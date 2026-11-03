@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Builds an NPC's field sheet (Idle<Facing>, Walk<Facing> and Work<Facing> when given) from PixelLab exports.
 
-    python scripts/characters/build_npc_idle.py <idle> [<idle.json>] <out dir> <Name> [--handles TEX ANIM]
+    python scripts/game/characters/build_npc_idle.py <idle> [<idle.json>] <out dir> <Name> [--handles TEX ANIM]
         [--durations 0.5 0.4 0.5 0.4] [--idle-step N]
         [--walk <walk> [<walk.json>]] [--walk-frames east=0,1,2,3,1,2 ...] [--walk-mirror west=east ...]
         [--work <work> [<work.json>]] [--work-frames east=3,4,5,6,7,8] [--work-mirror west=east]
@@ -235,7 +235,7 @@ def main():
         return f"    - Name: {clip_name}\n      Loop: Loop\n      Frames:\n{frames}"
     durations = {"Idle": args.durations, "Walk": [args.walk_duration], "Work": [args.work_duration]}
     what = ", ".join(k.lower() for k, c, _ in blocks if c)
-    text = (f"# {name}: {what} in its directions (scripts/characters/build_npc_idle.py).\n"
+    text = (f"# {name}: {what} in its directions (scripts/game/characters/build_npc_idle.py).\n"
             f"Handle: {animations}\nSpriteAnimationSet:\n  TextureHandle: {texture}\n  Texture: {name}.png\n"
             f"  DefaultClip: IdleDown\n  Clips:\n" + clip("Idle", "IdleDown", counts["Idle"], args.durations)
             + "".join(clip(f"{kind}{FACINGS[d]}", f"{kind}{FACINGS[d]}", len(frames), durations[kind])

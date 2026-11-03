@@ -1,4 +1,4 @@
-"""python scripts/japanese_city/gen_temple_tex.py <Assets/Textures/Ground/Grass.png> <art_incoming/jp_city/temple_r1>
+"""python scripts/game/japanese_city/gen_temple_tex.py <Assets/Textures/Ground/Grass.png> <art_incoming/jp_city/temple_r1>
        [<art_incoming/jp_city/step12_prepared/JP_Decal_DirtPatch.png>]
 
 Temple ground textures (Nov 2): mossy temple grass (a recolour of Grass.png), a ragged grass edge strip, a thin

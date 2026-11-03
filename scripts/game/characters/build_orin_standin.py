@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Builds the stand-in sheets for Orin Kenshi, the party's second hero, until his real art exists.
 
-    python scripts/characters/build_orin_standin.py
+    python scripts/game/characters/build_orin_standin.py
 
 Orin has no art yet (the brief for PixelLab is docs/OrinArtBrief.md). This makes a stand-in from the Gate Guard's
 idle sheet (Characters/NPC/GateGuard), its dark leather recoloured to Orin's navy so he doesn't read as a city
@@ -26,7 +26,7 @@ from pathlib import Path
 
 from PIL import Image
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 ASSETS = ROOT / "Oxygen" / "project" / "Assets"
 SOURCE = ASSETS / "Characters" / "NPC" / "GateGuard" / "GateGuard.png"
 OUT = ASSETS / "Characters" / "Player" / "Orin"

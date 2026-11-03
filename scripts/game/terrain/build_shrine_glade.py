@@ -9,7 +9,7 @@
   - Things that stood at the foot or the top of a moved edge (fences, banners, rocks, canopies) move with it; every
     placed thing keeps its height above the ground it stood on.
 
-    python scripts/terrain/build_shrine_glade.py [--dry-run]
+    python scripts/game/terrain/build_shrine_glade.py [--dry-run]
 """
 
 import argparse

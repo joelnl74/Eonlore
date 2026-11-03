@@ -1,15 +1,18 @@
 """Build the game's runtime UI into the test bed scenes (Battle, Shrine Glade, Farm Village and its inn) on the 1920 x 1080
 canvas (decision D5), in the game's own look: ink ribbons with bronze fittings, a vermilion cursor, washi paper for
-dialogue (scripts/ui/make_ui_art.py draws the art).
+dialogue (scripts/game/ui/make_ui_art.py draws the art).
 
-    python scripts/ui/build_game_ui.py [battle] [field]
+    python scripts/game/ui/build_game_ui.py [battle] [field] [prefab]
+
+"prefab" writes the field UI as Prefabs/UI/FieldUI.hyprefab, which FieldDirectorScript instantiates in any scene
+that has no field UI baked in.
 
 Close the scenes in the editor first. Each run removes what an earlier run (or the older UI it replaces) put there,
 by tag, with every descendant, and appends the UI again, so it can be run as often as needed; entity IDs come from
 the tags, so they stay the same between runs. Everything else in the scenes is left alone. The entity names are the
 ones BattleScript, FieldDirectorScript (its views) and DialogueScript look up: rename them in both places.
 
-Check the result offline with scripts/ui/preview_ui.py.
+Check the result offline with scripts/game/ui/preview_ui.py.
 
 Needs PyYAML.
 """
@@ -21,7 +24,7 @@ import sys
 
 import yaml
 
-ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", ".."))
+ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 ASSETS = os.path.join(ROOT, "Oxygen", "project", "Assets")
 SCENES = os.path.join(ASSETS, "Scenes")
 
@@ -260,8 +263,8 @@ ITEMS = [("Potion", "x3"), ("Hi-Potion", "x1"), ("Ether", "x2"), ("Herb Tea", "x
          ("Smoked Fish", "x2"), ("Spring Water", "x3"), ("Pine Resin", "x2"), ("Fox Mask", "x1")]
 
 
-def build_field(scene_name, director):
-    b = Builder(scene_name)
+def build_field(scene_name, director, b=None):
+    b = b or Builder(scene_name)
 
     # The interaction prompt over the player's head: a World canvas FieldDirectorScript (InteractPromptView) moves and shows.
     prompt = b.add("Prompt Canvas", director, TransformComponent=transform(), UICanvasComponent=canvas(5, world=([220, 52], [0.5, 0])))
@@ -564,16 +567,37 @@ def rebuild(scene_file, remove_tags, make, director_tags=("Battle Director", "MV
     print("%s: removed %d entities, added %d" % (scene_file, len(removed), len(builder.entities)))
 
 
+# The field UI as a prefab (Nov 3, 2026): FieldDirectorScript instantiates it under itself in any scene that has no
+# field UI of its own (the Japanese city, the temple, any scene a run starts in). The same canvases as build_field;
+# the handle is FieldDirectorScript::DefaultFieldUI.
+FIELD_UI_PREFAB = os.path.join(ASSETS, "Prefabs", "UI", "FieldUI.hyprefab")
+FIELD_UI_HANDLE = 1324405221109369128
+
+
+def write_field_prefab():
+    b = Builder("FieldUI")
+    root = b.add("Field UI", None, TransformComponent=transform())
+    build_field("FieldUI", root, b)
+    text = "Handle: %d\nPrefab: Field UI\nEntities:\n%s\n" % (FIELD_UI_HANDLE, dump_entities(b.entities, "  "))
+    yaml.safe_load(text)  # a valid file
+    os.makedirs(os.path.dirname(FIELD_UI_PREFAB), exist_ok=True)
+    with open(FIELD_UI_PREFAB, "w", newline="", encoding="utf-8") as file:
+        file.write(text)
+    print("%s: %d entities" % (FIELD_UI_PREFAB, len(b.entities)))
+
+
 def main():
-    which = sys.argv[1:] or ["battle", "field"]
+    which = sys.argv[1:] or ["battle", "field", "prefab"]
+    if "prefab" in which:
+        write_field_prefab()
     if "battle" in which:
         rebuild("Battle.hyscene", BATTLE_REMOVE, build_battle)
     if "field" in which:
         rebuild("ShrineGlade.hyscene", FIELD_REMOVE, lambda d: build_field("ShrineGlade", d))
         rebuild("FarmVillage.hyscene", FIELD_REMOVE, lambda d: build_field("FarmVillage", d))
-        # The Japanese countryside (scripts/japanese_city/build_countryside.py; its director is "Field Director").
+        # The Japanese countryside (scripts/game/japanese_city/build_countryside.py; its director is "Field Director").
         rebuild("JapaneseCountryside.hyscene", FIELD_REMOVE, lambda d: build_field("JapaneseCountryside", d), director_tags=("Field Director",))
-        # Interiors (scripts/interiors/build_inn.py writes the room; the UI is the field's).
+        # Interiors (scripts/game/interiors/build_inn.py writes the room; the UI is the field's).
         for interior in ("FarmVillageInn", "FarmVillageInnUpstairs"):
             if os.path.exists(os.path.join(SCENES, interior + ".hyscene")):
                 rebuild(interior + ".hyscene", FIELD_REMOVE, lambda d, name=interior: build_field(name, d))

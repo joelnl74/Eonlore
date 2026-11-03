@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Draws the Slime and the Spirit Wisp: a field sheet and a battle sheet each, to the HD-2D sprite rules.
 
-    python scripts/enemies/make_enemy_art.py [--out <dir>] [--preview <png>]
+    python scripts/game/enemies/make_enemy_art.py [--out <dir>] [--preview <png>]
 
 Field sheets (Characters/Enemy/<Name>/<Name>.png): 48 x 48 cells at 32 pixels per metre, like the props and
 Miko. Battle sheets (<Name>_Battle.png): 96 x 96 cells at about 53 pixels per metre, the battle Miko's density,
@@ -24,7 +24,7 @@ from pathlib import Path
 
 from PIL import Image
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 ENEMIES = ROOT / "Oxygen" / "project" / "Assets" / "Characters" / "Enemy"
 
 

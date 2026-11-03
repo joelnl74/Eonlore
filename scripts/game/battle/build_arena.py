@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Turns Assets/Scenes/Battle.hyscene into the forest arena: a clearing of the Shrine Glade's forest, in its style.
 
-    python scripts/battle/build_arena.py [--preview out.png]
+    python scripts/game/battle/build_arena.py [--preview out.png]
 
 What it does (idempotent: run it again after changing it):
   - The stage: a 3D floor (grass, a mossy earth clearing, a flagstone path), the torii and four stone lanterns
@@ -39,7 +39,7 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from stage import StageCamera  # noqa: E402
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 ASSETS = ROOT / "Oxygen" / "project" / "Assets"
 BATTLE = ASSETS / "Scenes" / "Battle.hyscene"
 SHRINE = ASSETS / "Scenes" / "ShrineGlade.hyscene"
@@ -174,7 +174,7 @@ def with_prefix(templates, prefix: str):
     return [e for tag, group in templates.items() if tag == prefix or tag.startswith(prefix + " ") for e in group]
 
 
-# The Shrine Glade's ground is a terrain now (scripts/terrain/build_shrine_glade.py): the ground entities these
+# The Shrine Glade's ground is a terrain now (scripts/game/terrain/build_shrine_glade.py): the ground entities these
 # materials came from are gone, so they are read from the material files instead.
 GROUND_MATERIALS = {
     "Ground Grass": "Materials/Ground/Grass.hymat",

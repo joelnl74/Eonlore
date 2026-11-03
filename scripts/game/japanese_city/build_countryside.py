@@ -8,7 +8,7 @@ the overview the user drew (docs/TestBed.md, "Japanese countryside"):
   - The paddies: sunk a step into each terrace, water over mud, rice seedlings (terrain decor), bunds to walk on.
   - West, a cedar forest on a raised, banked shelf: the ronin camp (Jokai and Sanzo, side quests), wisps between the
     trees, medicinal herbs to gather, and the ancient tree in its clearing where Orin waits (the quest builder,
-    scripts/quests/build_countryside_quest.py, adds him, the leyline and the way down into it).
+    scripts/game/quests/build_countryside_quest.py, adds him, the leyline and the way down into it).
   - East, the farm hub: a ring of farmhouses, a kura storehouse, a well and a persimmon around a yard, a vegetable
     garden (Genji and Okiku, side quests), and a bamboo grove up the bank behind it with shoots to gather.
   - A fox shrine off the road (a short tunnel of torii, stone foxes, a red maple), a pond with a weeping cherry, slimes
@@ -17,10 +17,10 @@ the overview the user drew (docs/TestBed.md, "Japanese countryside"):
 The city gate isn't modelled at the south edge: the field camera looks north, so anything tall south of the player
 stands between her and the camera; the road leaves the bottom of the screen there instead.
 
-    python scripts/japanese_city/make_countryside_art.py      # once: bamboo, the camp's tarp, the foxes, the rift
-    python scripts/japanese_city/build_countryside.py         # the terrain and the scene, then the field UI and the quest
-    python scripts/japanese_city/build_countryside.py --no-extras   # only the terrain and the scene (no UI, no quest)
-    python scripts/japanese_city/build_countryside.py --map-only    # only the preview map (scripts/terrain/out/)
+    python scripts/game/japanese_city/make_countryside_art.py      # once: bamboo, the camp's tarp, the foxes, the rift
+    python scripts/game/japanese_city/build_countryside.py         # the terrain and the scene, then the field UI and the quest
+    python scripts/game/japanese_city/build_countryside.py --no-extras   # only the terrain and the scene (no UI, no quest)
+    python scripts/game/japanese_city/build_countryside.py --map-only    # only the preview map (scripts/game/terrain/out/)
 
 Close the scene in the editor first: the whole scene is written again (its handle is kept).
 """
@@ -34,7 +34,7 @@ import sys
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
+REPO = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(REPO, "scripts", "terrain"))
 import build_kit_showcase as kit  # noqa: E402
@@ -181,7 +181,7 @@ PADDIES = paddies()
 
 
 def ground_z(x, y):
-    """The ground's height at (x, y) without building the terrain (for scripts/quests/build_countryside_quest.py):
+    """The ground's height at (x, y) without building the terrain (for scripts/game/quests/build_countryside_quest.py):
     the terrace, forest, paddy and pond levels, and the slope on the north-going ramps. Close to the mesher's answer
     away from the jittered edges, which is where things are put."""
     ax = np.array([x])
@@ -322,16 +322,26 @@ def make_settings():
     s.add_wall_layer(handle("Materials/Ground/EarthBank.hymat"), 0.5, False, slope=0.3)    # the paddies' low banks
     s.add_wall_layer(handle("Materials/Ground/EarthBank.hymat"), 0.57, False, slope=0.45)  # the forest's banks
     s.cap_material = handle("Materials/Ground/Boulder.hymat")
-    fv = {k: [kit.handle_of(os.path.join(ASSETS, p + ".hymeta")) for p in v] for k, v in scene_decor.FARMVILLAGE.items()}
+    # the farm village's decor lists without the lavender (Nov 2: a Japanese countryside), with the delivered Japanese
+    # shrubs mixed into the woods' floor and edges: bamboo grass, mondo grass and ferns under the cedars, azalea,
+    # camellia and nandina along the forest banks
+    fv = {k: [kit.handle_of(os.path.join(ASSETS, p + ".hymeta")) for p in v if "Lavender" not in p]
+          for k, v in scene_decor.FARMVILLAGE.items()}
+    jp = lambda *names: [handle("Sprites/Plants/JP_Shrub_%s.png" % n) for n in names]
+    jp_floor = jp("Sasa", "Sasa_V2", "Mondo", "Mondo_V2", "Fern", "Fern_V2")
+    jp_edge = jp("Azalea_A", "Azalea_A_V2", "Azalea_B", "Camellia", "Camellia_V2", "Nandina", "Nandina_V2", "Sasa", "Sasa_V2")
     size = (0.84, 1.23)
     seedlings = [handle("Sprites/Crops/Wheat_1%s.png" % c) for c in "ABCD"]
-    s.add_decor("LayerBorder", GRASS, "Upright", 1.4, size, fv["Decor Path Edge"])
-    s.add_decor("Layer", SHADE, "Upright", 0.35, size, fv["Decor Forest Floor"] + fv["Decor Woods Bush"])
+    # the edges (paddy bunds, the road): grass and leafy tufts only (the farm village's border was half wildflowers,
+    # which stood in the paddies' water)
+    path_edge = [h for h, p in zip(fv["Decor Path Edge"], scene_decor.FARMVILLAGE["Decor Path Edge"]) if "Wildflowers" not in p]
+    s.add_decor("LayerBorder", GRASS, "Upright", 1.4, size, path_edge)
+    s.add_decor("Layer", SHADE, "Upright", 0.35, size, fv["Decor Forest Floor"] + fv["Decor Woods Bush"][:4] + jp_floor * 2)
     s.add_decor("Layer", MUD, "Upright", 4.5, (0.3, 0.42), seedlings)                    # rice seedlings in the water
     s.add_decor("Layer", GRASS, "Upright", 0.06, size, fv["Decor Field Edge"] + fv["Decor Farm Meadow"])
     s.add_decor("WallFoot", hyterrain.ANY_WALL_LAYER, "Upright", 0.9, size, fv["Decor Wall Foot"])
     s.add_decor("WallTop", EARTH, "Upright", 1.1, size, fv["Decor Stream Bank"])
-    s.add_decor("WallTop", FOREST_BANK, "Upright", 0.8, size, fv["Decor Forest Edge"])
+    s.add_decor("WallTop", FOREST_BANK, "Upright", 0.8, size, fv["Decor Forest Edge"][:3] + jp_edge * 2)
     s.add_decor("WallFoot", STONE, "Stone", 0.9, (0.06, 0.1), [handle("Textures/Ground/Boulder.png")])
     return s
 
@@ -527,8 +537,10 @@ def woods(c):
     """The cedar forest west, the woods east and along the north: tall firs and pines with solid trunks, clearings
     for the camp and the ancient tree, the paths left open."""
     T = c.group("Woods")
-    tall = ["FirTallA", "FirTallB", "FirTallC", "FirTallD", "PineTall"]
-    small = ["FirSmallA", "FirSmallB", "FirSmallC", "FirSmallD", "FirSmallE", "FirSmallF", "FirSmallG"]
+    # (Nov 2: Japanese cedars and black pines instead of the farm village's firs, young pines and maples below them)
+    tall = ["JP_Tree_Sugi_A_Large", "JP_Tree_Sugi_B_Large", "JP_Tree_Sugi_A_Large", "JP_Tree_Sugi_B_Large", "PINE"]
+    small = ["JP_Tree_Sugi_A", "JP_Tree_Sugi_B", "JP_Tree_Sugi_A", "JP_Tree_BlackPine_Young_A_Large", "JP_Tree_BlackPine_Young_C_Large",
+             "JP_Tree_Maple_Young_A_Large", "JP_Tree_Maple_Young_D_Large"]
 
     def accept(x, y):
         mountain = y >= float(mountain_edge(np.array([x]), 0)[0]) + 1.5
@@ -548,17 +560,22 @@ def woods(c):
             continue
         if r < 0.72:
             name = tall[int(s * len(tall)) % len(tall)]
-            scale = 1.25 + 0.45 * s if name != "PineTall" else 1.35 + 0.3 * s
+            scale = 1.25 + 0.45 * s
+            if name == "PINE":
+                name, scale = ("JP_Tree_BlackPine_A_Large" if r < 0.36 else "JP_Tree_BlackPine_B_Large"), 0.68 + 0.15 * s
         else:
             name = small[int(s * len(small)) % len(small)]
             scale = 1.2 + 0.4 * s
         c.card(T, TREES, name, x, y, scale, solid=None if mountain else (0.7, 0.6, 2.0), flip=r > 0.86)
         count += 1
     # A few broadleaf trees among the fields and along the banks, so the open land isn't bare.
-    for (name, x, y, scale) in (("OakSunA", -38.0, -40.0, 1.0), ("OakSunB", 21.0, -44.0, 0.9), ("OakYoungB", -2.5, 12.0, 1.0),
-                                ("OakSunC", 22.0, 20.0, 0.9), ("OakGnarledSmall", 4.4, 44.6, 1.1), ("LindenAutumnC", 46.0, 48.0, 1.2),
-                                ("OakSunA", 33.0, 68.0, 1.0), ("PineTall", -4.5, 66.4, 1.4), ("PineTall", 5.0, 80.0, 1.3),
-                                ("OakSunB", -24.0, 78.0, 1.0), ("LindenAutumnE", 40.0, 78.0, 1.1), ("OakYoungB", 24.0, 50.0, 1.0)):
+    # (Nov 2: Japanese trees instead of the farm village's oaks: black pines, maples, a cedar, a persimmon)
+    for (name, x, y, scale) in (("JP_Tree_BlackPine_A_Large", -38.0, -40.0, 0.95), ("JP_Tree_Maple_Orange_Large", 21.0, -44.0, 0.9),
+                                ("JP_Tree_Maple_Young_B_Large", -2.5, 12.0, 1.3), ("JP_Tree_Sugi_A_Large", 22.0, 20.0, 0.95),
+                                ("JP_Tree_BlackPine_Small_Large", 4.4, 44.6, 0.85), ("JP_Tree_Maple_Red_B_Large", 46.0, 48.0, 0.6),
+                                ("JP_Tree_Persimmon_Large", 33.0, 68.0, 0.8), ("JP_Tree_BlackPine_B_Large", -4.5, 66.4, 0.7),
+                                ("JP_Tree_BlackPine_A_Large", 5.0, 80.0, 0.65), ("JP_Tree_Maple_Red_A_Large", -24.0, 78.0, 0.85),
+                                ("JP_Tree_Maple_Orange_Large", 40.0, 78.0, 0.55), ("JP_Tree_Maple_Young_C_Large", 24.0, 50.0, 1.3)):
         c.card(T, TREES, name, x, y, scale, solid=(0.8, 0.7, 2.0))
     return count
 
@@ -607,7 +624,7 @@ def road_side(c):
         c.light(F, fx + s * 2.6, fy - 1.6, 1.15, 0.8, 3.0)
     # the red maple behind it, and two more on the verges between the road and the paddies (Octopath's autumn accents)
     for (x, y, scale) in ((fx - 5.5, fy + 5.0, 1.25), (4.3, 33.0, 1.0), (-3.9, 64.0, 1.05)):
-        c.card(F, TREES, "LindenAutumnA", x, y, scale, color=(1.0, 0.52, 0.44, 1), solid=(0.8, 0.7, 2.0))
+        c.card(F, TREES, "JP_Tree_Maple_Red_A_Large", x, y, scale * 0.5, solid=(0.8, 0.7, 2.0))
 
     # The pond and its weeping cherry, a bench to sit by it.
     P = c.group("Pond", R)
@@ -638,12 +655,14 @@ def farm(c):
     """The farm hub: houses round a yard, the kura, the well and the persimmon, the garden, the bamboo grove."""
     H = c.group("Farm")
     hx, hy = HUB
-    c.house(H, "JP_Poor_RowHouse_A", 28.0, 14.5)
-    c.house(H, "JP_Poor_House_A", 42.0, 15.0)
-    c.house(H, "JP_Rich_Storehouse_A", 52.0, 14.5, windows=False)
-    c.house(H, "JP_Poor_Hut_A", 57.5, 7.0, rot=-90.0, windows=False)
-    c.house(H, "JP_Poor_House_B", 57.0, -1.5, rot=-90.0, windows=False)
-    c.house(H, "JP_Poor_Hut_B", 22.5, 15.5)
+    # (Nov 2, after the user's farmhouse pictures: thatched minka with porches, lean-tos and persimmons drying, the
+    # timber storehouse under thatch, a thatched shed and barn, instead of the town's plank row houses)
+    c.house(H, "JP_Farm_Minka_A", 28.0, 14.5)
+    c.house(H, "JP_Farm_Minka_B", 41.5, 15.0)
+    c.house(H, "JP_Farm_Storehouse_A", 52.0, 14.5, windows=False)          # the timber storehouse under thatch
+    c.house(H, "JP_Farm_Shed_A", 57.5, 7.0, rot=-90.0, windows=False)
+    c.house(H, "JP_Farm_Minka_C", 57.0, -1.5, rot=-90.0, windows=False)
+    c.house(H, "JP_Farm_Barn_A", 18.0, 15.5)
     for (name, x, y, rot) in (("Well_A", 44.5, 5.5, 0), ("Handcart_A", 33.0, 9.6, 30), ("Kamado_A", 46.6, 13.4, 0), ("Barrel_A", 38.3, 13.6, 0),
                               ("WaterJar_A", 40.0, 13.7, 0), ("Buckets_A", 45.4, 4.2, 0), ("LaundryPole_A", 35.0, 12.8, 0),
                               ("RainBarrel_A", 49.0, 13.8, 0), ("Crate_A", 54.5, 12.9, 10), ("Barrel_A", 55.4, 12.6, 0),
@@ -652,16 +671,16 @@ def farm(c):
         c.place(H, "Props/JP_Prop_" + name, x, y, rot)
     c.light(H, 46.6, 13.0, 0.6, 1.0, 3.0, "Fire")
     # the persimmon in the yard's corner (an autumn linden, warmer), and a younger one by the lane
-    c.card(H, TREES, "LindenAutumnB", 33.0, 2.5, 1.15, color=(1.0, 0.78, 0.55, 1), solid=(0.8, 0.7, 2.0))
-    c.card(H, TREES, "LindenAutumnD", 24.0, 9.5, 0.8, color=(1.0, 0.8, 0.6, 1), solid=(0.7, 0.6, 2.0))
+    c.card(H, TREES, "JP_Tree_Persimmon", 33.0, 2.5, 1.15, solid=(0.8, 0.7, 2.0))
+    c.card(H, TREES, "JP_Tree_Persimmon", 24.0, 9.5, 0.8, solid=(0.7, 0.6, 2.0), flip=True)
     # the vegetable garden south east of the yard: rows, a scarecrow, tools
     rows = ["CabbageRow", "GreensRow", "OnionRow", "TurnipRow", "LettuceRow", "RedCabbageRow"]
     for k in range(6):
         for n in range(2):
             c.card(H, CROPS, rows[(k + n) % len(rows)], 48.6 + n * 3.2, -3.4 + k * 0.95, 1.0)
-    for (name, x, y, folder) in (("Scarecrow", 55.4, -1.0, PROPS), ("Wheelbarrow", 53.8, 2.6, PROPS), ("FarmTools", 46.6, 2.2, PROPS),
+    for (name, x, y, folder) in (("Scarecrow", 53.2, 0.2, PROPS), ("Wheelbarrow", 53.8, 2.6, PROPS), ("FarmTools", 46.6, 2.2, PROPS),
                                  ("HayBaleRound", 30.0, 10.9, PROPS), ("HayBale", 31.4, 11.4, PROPS), ("Sacks", 50.4, 13.3, PROPS),
-                                 ("Produce", 47.8, 12.8, PROPS), ("Firewood", 25.6, 13.6, PROPS), ("WaterTrough", 37.0, 3.0, PROPS)):
+                                 ("Produce", 47.8, 12.8, PROPS), ("Firewood", 21.8, 13.4, PROPS), ("WaterTrough", 37.0, 3.0, PROPS)):
         c.card(H, folder, name, x, y, 1.0, solid=(0.6, 0.4, 1.0))
     # windows lit at dusk, and a lantern at the yard's gate
     c.place(H, "Props/JP_Prop_StoneLantern_A", 30.0, 4.0)
@@ -669,7 +688,7 @@ def farm(c):
 
     # The bamboo grove up the bank behind the farm: clumps with solid feet, a path through, shoots to gather.
     G = c.group("Bamboo Grove", H)
-    bamboo = ["BambooA", "BambooB", "BambooC"]
+    bamboo = ["JP_Tree_Bamboo_Clump_Large", "JP_Tree_Bamboo_Clump_B_Large", "JP_Tree_Bamboo_Clump_Large"]
 
     def grove(x, y):
         return (41.0 < x < 61.0 and 26.0 < y < 46.0 and near_path(x, y, 1.8) is False and in_forest(x, y, 0.0) is False
@@ -876,7 +895,7 @@ def main():
     marks = [(CAMP[0], CAMP[1], (255, 60, 60)), (TREE[0], TREE[1], (80, 220, 255)), (HUB[0], HUB[1], (255, 220, 60)),
              (FOX[0], FOX[1], (255, 120, 40)), (0.0, LANDING[2] - 1.0, (255, 255, 255)), (0.5, -49.0, (255, 255, 255))]
     preview_map(g, weights, masks, os.path.join(out, "countryside_map.png"), marks)
-    print("map: scripts/terrain/out/countryside_map.png; %d paddies" % len(PADDIES))
+    print("map: scripts/game/terrain/out/countryside_map.png; %d paddies" % len(PADDIES))
     if args.map_only:
         return
 
@@ -941,7 +960,7 @@ def main():
         print("missing (skipped):", sorted(set(c.d.missing)))
     if args.no_extras:
         return
-    for script, extra in (("scripts/ui/build_game_ui.py", ["field"]), ("scripts/quests/build_countryside_quest.py", [])):
+    for script, extra in (("scripts/game/ui/build_game_ui.py", ["field"]), ("scripts/game/quests/build_countryside_quest.py", [])):
         print("running", script)
         subprocess.check_call([sys.executable, os.path.join(REPO, script)] + extra, cwd=REPO)
 

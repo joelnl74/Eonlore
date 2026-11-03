@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Adds the party's other heroes to Battle.hyscene next to Miko: "Hero <Id>" and "Hero <Id> Shadow" in the Party folder.
 
-    python scripts/battle/party_slots.py
+    python scripts/game/battle/party_slots.py
 
 BattleScript finds a hero by "Hero <Id>" (its sprite, standing upright on the floor like "Hero Miko") and
 "Hero <Id> Shadow" (its contact shadow), and hides heroes not in the party. Miko's entities are the model: the same
 scale and sprite settings, its texture and animations swapped for the hero's, standing at FEET (the floor point,
 in metres; Miko stands at about (3.2, -0.9), the enemies on the left). The status block ("Status <Id>") is runtime
-UI: scripts/ui/build_game_ui.py battle.
+UI: scripts/game/ui/build_game_ui.py battle.
 
 Idempotent: the entities it wrote before are replaced (their IDs come from their tags); nothing else in the file
 changes. The rest of the arena was built by build_arena.py, which is out of date (its asset paths moved).
@@ -20,7 +20,7 @@ from pathlib import Path
 
 import yaml
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 SCENE = ROOT / "Oxygen" / "project" / "Assets" / "Scenes" / "Battle.hyscene"
 
 # Id, battle texture, battle animations, the floor point its feet stand on.

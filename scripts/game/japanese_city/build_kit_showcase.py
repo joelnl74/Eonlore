@@ -9,7 +9,7 @@ owned by this script: don't edit it in the editor, change this file). Entity ids
 names, so they stay the same from run to run; a glb's .hymeta is only written when it is missing (the importer adds the
 Images / Materials lists to it on first load, which must survive).
 
-    python scripts/japanese_city/build_kit_showcase.py [--profile Day|Dusk|Night]
+    python scripts/game/japanese_city/build_kit_showcase.py [--profile Day|Dusk|Night]
 Close the scene in Oxygen first. Check: Oxygen --scene JapaneseCityKit_Showcase --play --frames 120 --capture out.png
 """
 
@@ -20,7 +20,7 @@ import math
 import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
+REPO = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 ASSETS = os.path.join(REPO, "Oxygen", "project", "Assets")
 MODELS = os.path.join(ASSETS, "Models", "JapaneseCity")
 SUMMARY = os.path.join(MODELS, "Source", "JP_Kit", "kit_summary.json")

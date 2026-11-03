@@ -14,7 +14,7 @@ Ground: box shapes with the kit's paving / alley-dirt textures (Materials/Japane
 colliders; terraces are retaining-wall modules; everything else is the kit's glbs and the PixelLab sprite cards.
 Rewrites the scene on every run (don't edit it in the editor). Entity ids come from names (stable across runs).
 
-    python scripts/japanese_city/build_city_scene.py [--profile Day|Dusk|Night]
+    python scripts/game/japanese_city/build_city_scene.py [--profile Day|Dusk|Night]
 Close the scene in Oxygen first. Check: Oxygen --scene JapaneseCity --play --frames 150 --capture out.png
 """
 
@@ -22,6 +22,7 @@ import argparse
 import json
 import math
 import os
+import re
 import shutil
 import sys
 
@@ -46,6 +47,21 @@ def stable_handle(name):
     return int(kit.hashlib.sha256(("JP_City:asset:" + name).encode()).hexdigest()[:16], 16) & 0x7FFFFFFFFFFFFFFF
 
 
+def write_material(path, text):
+    """Writes a .hymat, keeping the normal map scripts/game/textures/make_normal_maps.py set on it (Nov 3, 2026: the
+    builders rewrite their materials on every run, which dropped NormalHandle / NormalStrength)."""
+    keep = ""
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            old = f.read()
+        for key in ("NormalHandle", "NormalStrength"):
+            m = re.search(r"^  %s: .*$" % key, old, re.M)
+            if m and ("  %s:" % key) not in text:
+                keep += m.group(0) + "\n"
+    with open(path, "w", newline="\r\n") as f:
+        f.write(text + keep)
+
+
 def ground_material(name, tiling=0.25):
     """Copy a kit texture to Textures/JapaneseCity (repeat wrap) and give it a material with 32 texels per metre."""
     os.makedirs(TEX_DIR, exist_ok=True); os.makedirs(MAT_DIR, exist_ok=True)
@@ -58,8 +74,7 @@ def ground_material(name, tiling=0.25):
     tex = kit.handle_of(png + ".hymeta")
     mat = os.path.join(MAT_DIR, name + ".hymat")
     h = kit.handle_of(mat) if os.path.exists(mat) else stable_handle("mat:" + name)
-    with open(mat, "w", newline="\r\n") as f:
-        f.write("Handle: %d\nMaterial:\n  Type: Standard\n  AlbedoHandle: %d\n  Tint: [1, 1, 1, 1]\n  Tiling: [%g, %g]\n"
+    write_material(mat, "Handle: %d\nMaterial:\n  Type: Standard\n  AlbedoHandle: %d\n  Tint: [1, 1, 1, 1]\n  Tiling: [%g, %g]\n"
                 "  EmissionColor: [0, 0, 0]\n  EmissionIntensity: 1\n  AlphaCutoff: 0\n  Filter: Nearest\n" % (h, tex, tiling, tiling))
     return h
 

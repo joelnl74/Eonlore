@@ -14,7 +14,7 @@ the style of the Plants and Trees sheets: dark outline, three or four tones, lig
                                                         the ground: steps down into the dark between split roots,
                                                         and its glowing veins on their own (drawn emissive, faded in)
 
-    python scripts/japanese_city/make_countryside_art.py
+    python scripts/game/japanese_city/make_countryside_art.py
 
 Writes a .hymeta next to each new file (once; the handle is kept on later runs).
 """
@@ -27,7 +27,7 @@ import random
 from PIL import Image, ImageDraw
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ASSETS = os.path.abspath(os.path.join(HERE, "..", "..", "Oxygen", "project", "Assets"))
+ASSETS = os.path.abspath(os.path.join(HERE, "..", "..", "..", "Oxygen", "project", "Assets"))
 
 OUTLINE = (32, 38, 24, 255)
 STALK = [(78, 110, 46, 255), (112, 146, 60, 255), (150, 176, 82, 255), (186, 202, 112, 255)]
@@ -285,7 +285,7 @@ def save(img, folder, name):
 def main():
     trees = os.path.join(ASSETS, "Sprites", "Trees")
     props = os.path.join(ASSETS, "Sprites", "Props")
-    delivered = os.path.join(HERE, "..", "..", "art_incoming", "jp_city", "trees_r1", "JP_Tree_Bamboo_Clump_Large.png")
+    delivered = os.path.join(HERE, "..", "..", "..", "art_incoming", "jp_city", "trees_r1", "JP_Tree_Bamboo_Clump_Large.png")
     for name, size, stalks, seed in (("BambooA", (72, 300), 6, 11), ("BambooB", (60, 270), 4, 23), ("BambooC", (88, 320), 8, 37)):
         if os.path.exists(delivered):
             # Nov 2: the delivered PixelLab bamboo replaces these drawn clumps (install_jp_trees.py); don't draw over it

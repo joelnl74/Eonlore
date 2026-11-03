@@ -11,7 +11,7 @@ game's sprite folders, Nov 2:
 A scene stores each tree card's size when it is built, so rebuild the scenes that use them afterwards
 (build_city_slice.py, build_temple_district.py, build_countryside.py, build_city_scene.py).
 
-    python scripts/japanese_city/install_jp_trees.py
+    python scripts/game/japanese_city/install_jp_trees.py
 """
 
 import os
@@ -22,7 +22,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import build_city_scene as city  # noqa: E402  (stable_handle)
 
-REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
+REPO = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 ASSETS = os.path.join(REPO, "Oxygen", "project", "Assets")
 SRC = os.path.join(REPO, "art_incoming", "jp_city", "trees_r1")
 BACKUP = os.path.join(REPO, "art_incoming", "jp_city", "_backup", "stand_in_trees_2026-11-02")

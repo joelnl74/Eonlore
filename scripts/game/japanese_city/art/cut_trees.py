@@ -4,7 +4,7 @@ black outline -> a darker shade of the colour it borders, then
   out/<name>_Large.png  the full image read at 32 px/m (twice the size: a 7 m temple pine, a 7.5 m bamboo clump)
   out/JP_Shrub_*.png    the shrub sheets cut into their nine plants, halved.
 
-    python scripts/japanese_city/art/cut_trees.py art_incoming/jp_city/trees_r1/_raw art_incoming/jp_city/trees_r1
+    python scripts/game/japanese_city/art/cut_trees.py art_incoming/jp_city/trees_r1/_raw art_incoming/jp_city/trees_r1
 Then install_jp_trees.py puts them in the game's sprite folders."""
 import json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

@@ -8,7 +8,7 @@ Outline lift: an edge pixel darker than luma 45 takes the colour of the nearest 
 outline, darkened one step on the shadow side (lower right) and kept as is on the lit side (upper left). Objects whose
 material is dark (black iron, lacquer) keep their dark edge because their inside is dark too.
 
-  python scripts/japanese_city/clean_prop_sprites.py --map map.json --src <folder> --out <folder> [--palette palette_48.png]
+  python scripts/game/japanese_city/clean_prop_sprites.py --map map.json --src <folder> --out <folder> [--palette palette_48.png]
 map.json: {"source.png": ["NewName", "top" | "bottom"], ...}
 Needs Pillow and numpy.
 """
@@ -21,7 +21,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-sys.path[0:0] = [str(Path(__file__).resolve().parent), str(Path(__file__).resolve().parent.parent)]
+sys.path[0:0] = [str(Path(__file__).resolve().parent), str(Path(__file__).resolve().parents[2])]
 
 
 def Luma(a):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Builds Miko's field sheet (Characters/Player/Miko/Miko_Field.png + .hymeta + .hyanim) from PixelLab exports.
 
-    python scripts/characters/build_miko_field.py --idle <Idle export dir> --walk <walking export dir>
+    python scripts/game/characters/build_miko_field.py --idle <Idle export dir> --walk <walking export dir>
         [--old <current Miko_Field.png, for the Kick/Punch/Death rows>] [--out <dir>] [--preview <png>]
 
 The export dirs are PixelLab character zips unpacked (metadata.json, <name>/animations/<Anim>/<direction>/frame_*.png).

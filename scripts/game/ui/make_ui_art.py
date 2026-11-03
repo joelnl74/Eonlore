@@ -4,7 +4,7 @@ Original art in the game's own craft language (docs/StyleGuide.md, the art guide
 bronze fittings, washi paper, shrine-red accents. Everything is drawn here at 4x and scaled down, so the edges are
 smooth; the images are imported with linear filtering. Run it again after changing a shape:
 
-    python scripts/ui/make_ui_art.py
+    python scripts/game/ui/make_ui_art.py
 
 Writes the PNGs and, for new ones, a .hymeta with a fresh handle (linear, clamped, single sprite). The nine-slice
 borders each image is drawn for are listed in BORDERS (and docs/SceneAndECS.md, "UI art").
@@ -18,7 +18,7 @@ import random
 
 from PIL import Image, ImageDraw, ImageFilter
 
-OUT = os.path.join(os.path.dirname(__file__), "..", "..", "Oxygen", "project", "Assets", "UI")
+OUT = os.path.join(os.path.dirname(__file__), "..", "..", "..", "Oxygen", "project", "Assets", "UI")
 S = 4  # supersampling
 
 INK = (14, 17, 26)
