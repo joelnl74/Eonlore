@@ -27,7 +27,7 @@ from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[3]
-ASSETS = ROOT / "Oxygen" / "project" / "Assets"
+ASSETS = ROOT / "Project" / "Assets"
 SOURCE = ASSETS / "Characters" / "NPC" / "GateGuard" / "GateGuard.png"
 OUT = ASSETS / "Characters" / "Player" / "Orin"
 

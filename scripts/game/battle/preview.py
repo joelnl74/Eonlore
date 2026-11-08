@@ -23,7 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from stage import StageCamera  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[3]
-ASSETS = ROOT / "Oxygen" / "project" / "Assets"
+ASSETS = ROOT / "Project" / "Assets"
 WIDTH, HEIGHT = 1280, 720
 
 HANDLES: dict[int, Path] = {}

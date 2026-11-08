@@ -1,4 +1,4 @@
-"""Writes Oxygen/project/Assets/Scenes/JapaneseCity.hyscene: a first full field scene built from the Japanese city kit,
+"""Writes Project/Assets/Scenes/JapaneseCity.hyscene: a first full field scene built from the Japanese city kit,
 to see in the game what the kit still lacks (JP_CITY_SCENE_PLAN.md zones, Nov 1 references: OT2 Ku, wuxia HD-2D).
 
 Layout, south (near the camera) to north, three terraces joined by granite stairs:

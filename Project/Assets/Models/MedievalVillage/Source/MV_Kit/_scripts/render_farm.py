@@ -12,6 +12,6 @@ for name in ("MV_House_A","MV_House_B","MV_Barn_A","MV_Shop_A","MV_Cottage_Thatc
     roofs[name] = sorted(mats)
 print("ROOFS::", roofs)
 sc.camera = bpy.data.objects["PV_FarmCam"]
-sc.render.filepath = r"C:\Users\joeln\Hydro\Oxygen\project\Assets\Models\MedievalVillage\Source\MV_Kit\preview_farm.png"
+sc.render.filepath = r"C:\Users\joeln\Hydro\Projects\Eonlore\Project\Assets\Models\MedievalVillage\Source\MV_Kit\preview_farm.png"
 sc.render.resolution_x, sc.render.resolution_y = 1600, 900
 bpy.ops.render.render(write_still=True)

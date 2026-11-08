@@ -1,7 +1,7 @@
 """Draw a scene's runtime UI offline, the way Scene::ResolveUILayout and SceneUIRenderer::Submit do, to check a layout
 without the engine (a cloud session, a quick look at a builder's output).
 
-    python scripts/game/ui/preview_ui.py Oxygen/project/Assets/Scenes/Battle.hyscene --out preview.png
+    python scripts/game/ui/preview_ui.py Project/Assets/Scenes/Battle.hyscene --out preview.png
         [--size 1920 1080] [--canvas "Battle UI Canvas" ...] [--show "Target Panel" ...] [--hide "Command Panel" ...]
         [--focus "Command 0"] [--world "Enemy 0 Info=700,620" ...] [--background picture.png]
 
@@ -23,7 +23,7 @@ import yaml
 from PIL import Image, ImageDraw
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-ASSETS = os.path.join(ROOT, "Oxygen", "project", "Assets")
+ASSETS = os.path.join(ROOT, "Project", "Assets")
 
 
 def parse_args():

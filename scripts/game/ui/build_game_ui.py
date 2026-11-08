@@ -25,7 +25,7 @@ import sys
 import yaml
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-ASSETS = os.path.join(ROOT, "Oxygen", "project", "Assets")
+ASSETS = os.path.join(ROOT, "Project", "Assets")
 SCENES = os.path.join(ASSETS, "Scenes")
 
 

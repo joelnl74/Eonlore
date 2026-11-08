@@ -27,7 +27,7 @@ import random
 from PIL import Image, ImageDraw
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ASSETS = os.path.abspath(os.path.join(HERE, "..", "..", "..", "Oxygen", "project", "Assets"))
+ASSETS = os.path.abspath(os.path.join(HERE, "..", "..", "..", "Project", "Assets"))
 
 OUTLINE = (32, 38, 24, 255)
 STALK = [(78, 110, 46, 255), (112, 146, 60, 255), (150, 176, 82, 255), (186, 202, 112, 255)]

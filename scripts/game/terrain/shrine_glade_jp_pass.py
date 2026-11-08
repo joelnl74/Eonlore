@@ -71,7 +71,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 sys.path.insert(0, os.path.join(HERE, ".."))
 import look  # noqa: E402  (scripts/game/look.py)
-ASSETS = os.path.join(REPO, "Oxygen", "project", "Assets")
+ASSETS = os.path.join(REPO, "Project", "Assets")
 SCENE = os.path.join(ASSETS, "Scenes", "ShrineGlade.hyscene")
 TERRAIN = os.path.join(ASSETS, "Terrains", "ShrineGlade.hyterrain")
 FENCE_MODEL = "JP_Prop_FenceBamboo_2m_A"

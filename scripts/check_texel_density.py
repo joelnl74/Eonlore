@@ -16,8 +16,8 @@ What it measures:
 Overlay sprites (UI) and sprites without a texture are skipped.
 
 Usage (Python 3.9+, needs PyYAML; numpy optional for the .glb part):
-  python scripts/check_texel_density.py Oxygen/project/Assets/Scenes/FarmVillage.hyscene
-  python scripts/check_texel_density.py <scene> --target 32 --tolerance 0.2 --assets Oxygen/project/Assets
+  python scripts/check_texel_density.py Project/Assets/Scenes/FarmVillage.hyscene
+  python scripts/check_texel_density.py <scene> --target 32 --tolerance 0.2 --assets Project/Assets
   python scripts/check_texel_density.py <scene> --strict      (exit code 1 when anything is outside)
 """
 

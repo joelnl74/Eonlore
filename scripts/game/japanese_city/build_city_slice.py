@@ -1,4 +1,4 @@
-"""Writes Oxygen/project/Assets/Scenes/JapaneseCitySlice.hyscene: the first *playable* piece of the Japanese city, laid
+"""Writes Project/Assets/Scenes/JapaneseCitySlice.hyscene: the first *playable* piece of the Japanese city, laid
 out for the field camera from the Nov 1 layout references (merchant street, stair street, gate plaza):
 
   - Merchant street (z 0): runs left to right across the screen. Shops only on the far (north) side, facing the

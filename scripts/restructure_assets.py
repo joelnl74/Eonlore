@@ -31,7 +31,7 @@ import sys
 from pathlib import Path, PurePosixPath
 
 REPO = Path(__file__).resolve().parents[1]
-ASSETS = REPO / "Oxygen" / "project" / "Assets"
+ASSETS = REPO / "Project" / "Assets"
 WORK = REPO / "_build" / "restructure"
 SIDECAR = ".hymeta"
 
@@ -177,7 +177,7 @@ def longest_prefix(entry, models):
 
 # ---------------------------------------------------------------- text edits (paths named in code and tools)
 # (file relative to the repo AFTER the move, old text, new text). Every old text must be found (all occurrences change).
-KIT = "Oxygen/project/Assets/Models/MedievalVillage/Source/MV_Kit/_scripts/"
+KIT = "Project/Assets/Models/MedievalVillage/Source/MV_Kit/_scripts/"
 TEXT_EDITS = [
     ("Oxygen/src/Scripts/ShrineScripts.h", '"ShrineGlade/RenderProfiles/', '"RenderProfiles/ShrineGlade/'),
     ("Oxygen/src/Scripts/ShrineScripts.h", '"FarmVillage/RenderProfiles/', '"RenderProfiles/FarmVillage/'),
@@ -185,11 +185,11 @@ TEXT_EDITS = [
     ("Oxygen/src/Scripts/VillageScripts.h", 'FindHandle("Effects/DustPuff.hyprefab")', 'FindHandle("Prefabs/Effects/DustPuff.hyprefab")'),
     ("Oxygen/src/Scripts/VillageScripts.h", "empty uses Effects/DustPuff", "empty uses Prefabs/Effects/DustPuff"),
     ("Hydro/src/Hydro/Scene/Vfx.h", '"Effects/DustPuff.hyprefab"', '"Prefabs/Effects/DustPuff.hyprefab"'),
-    (KIT + "build_kit.py", r'ROOT = Path(r"C:\Users\joeln\Hydro\Oxygen\project\Assets\MedievalVillage")',
-     r'ROOT = Path(r"C:\Users\joeln\Hydro\Oxygen\project\Assets\Models\MedievalVillage")'),
+    (KIT + "build_kit.py", r'ROOT = Path(r"C:\Users\joeln\Hydro\Projects\Eonlore\Project\Assets\MedievalVillage")',
+     r'ROOT = Path(r"C:\Users\joeln\Hydro\Projects\Eonlore\Project\Assets\Models\MedievalVillage")'),
     (KIT + "build_kit.py", 'SRC = ROOT / "Models" / "Source" / "MV_Kit"', 'SRC = ROOT / "Source" / "MV_Kit"'),
-    (KIT + "build_kit.py", r'SG = Path(r"C:\Users\joeln\Hydro\Oxygen\project\Assets\ShrineGlade")',
-     r'SG = Path(r"C:\Users\joeln\Hydro\Oxygen\project\Assets")   # Assets root since the Oct 30, 2026 restructure'),
+    (KIT + "build_kit.py", r'SG = Path(r"C:\Users\joeln\Hydro\Projects\Eonlore\Project\Assets\ShrineGlade")',
+     r'SG = Path(r"C:\Users\joeln\Hydro\Projects\Eonlore\Project\Assets")   # Assets root since the Oct 30, 2026 restructure'),
     (KIT + "build_kit.py", 'SG / "Textures/Grass.png"', 'SG / "Textures/Ground/Grass.png"'),
     (KIT + "build_kit.py", 'SG / "Textures/Dirt.png"', 'SG / "Textures/Ground/Dirt.png"'),
     (KIT + "build_kit.py", '    p = SG / "Foliage" / fname\n',
@@ -211,7 +211,7 @@ TEXT_EDITS = [
     ("scripts/interiors/build_inn.py", '"Interiors", "Materials"', '"Materials", "Interior"'),
     ("scripts/interiors/build_inn.py", '"Interiors", "RenderProfiles"', '"RenderProfiles", "Interiors"'),
 ]
-OLD_KIT = "Oxygen/project/Assets/MedievalVillage/Models/Source/MV_Kit/_scripts/"
+OLD_KIT = "Project/Assets/MedievalVillage/Models/Source/MV_Kit/_scripts/"
 for _rel, _old, _new in TEXT_EDITS:   # an edit must not match its own result, or a second run would apply it twice
     assert _old not in _new, "text edit would apply twice: %s: %s" % (_rel, _old)
 

@@ -15,7 +15,7 @@ entity that already has the component keeps it, and the binding is dropped.
 
     python scripts/migrate_script_to_component.py --script WaypointScript --component WaypointComponent [--dry-run] [files...]
 
-Without files: every .hyscene and .hyprefab under Oxygen/project/Assets. Close the scenes in the editor first.
+Without files: every .hyscene and .hyprefab under Project/Assets. Close the scenes in the editor first.
 """
 import argparse
 import json
@@ -26,7 +26,7 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-ASSETS = ROOT / "Oxygen" / "project" / "Assets"
+ASSETS = ROOT / "Project" / "Assets"
 
 
 def scalar(value) -> str:

@@ -1,4 +1,4 @@
-"""Add the countryside's quests to Oxygen/project/Assets/Scenes/JapaneseCountryside.hyscene (docs/TestBed.md,
+"""Add the countryside's quests to Project/Assets/Scenes/JapaneseCountryside.hyscene (docs/TestBed.md,
 "Countryside quest" and "Japanese countryside"):
 
   - "The Guardian's Duty" (CountrysideQuestScript, Game/src/Scripts/Countryside/CountrysideQuestScript.h): the

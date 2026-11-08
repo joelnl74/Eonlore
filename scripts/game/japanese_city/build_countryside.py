@@ -1,5 +1,5 @@
-"""Writes the Japanese countryside (Nov 2, 2026): Oxygen/project/Assets/Terrains/JapaneseCountryside.hyterrain and
-Oxygen/project/Assets/Scenes/JapaneseCountryside.hyscene, the largest field scene so far (140 x 152 m), laid out after
+"""Writes the Japanese countryside (Nov 2, 2026): Project/Assets/Terrains/JapaneseCountryside.hyterrain and
+Project/Assets/Scenes/JapaneseCountryside.hyscene, the largest field scene so far (140 x 152 m), laid out after
 the overview the user drew (docs/TestBed.md, "Japanese countryside"):
 
   - A road from the south edge (towards the city gate: "Exit JapaneseCitySlice") north through terraced rice

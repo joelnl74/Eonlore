@@ -35,7 +35,7 @@ import numpy as np
 from PIL import Image
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-ASSETS = os.path.join(ROOT, "Oxygen", "project", "Assets")
+ASSETS = os.path.join(ROOT, "Project", "Assets")
 
 DEFAULT_SCENES = ["ShrineGlade", "FarmVillage", "FarmVillageInn", "FarmVillageInnUpstairs", "Battle"]
 SUFFIX = "_N"

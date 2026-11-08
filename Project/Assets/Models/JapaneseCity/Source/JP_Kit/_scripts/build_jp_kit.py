@@ -19,7 +19,7 @@ import bpy, bmesh, math, os, sys, json, random
 from mathutils import Matrix, Vector
 from pathlib import Path
 
-ROOT = Path(r"C:\Users\joeln\Hydro\Oxygen\project\Assets\Models\JapaneseCity")
+ROOT = Path(r"C:\Users\joeln\Hydro\Projects\Eonlore\Project\Assets\Models\JapaneseCity")
 SRC = ROOT / "Source" / "JP_Kit"
 TEX = SRC / "Textures"
 SCRIPTS = Path(__file__).resolve().parent

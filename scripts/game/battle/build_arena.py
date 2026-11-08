@@ -40,7 +40,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from stage import StageCamera  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[3]
-ASSETS = ROOT / "Oxygen" / "project" / "Assets"
+ASSETS = ROOT / "Project" / "Assets"
 BATTLE = ASSETS / "Scenes" / "Battle.hyscene"
 SHRINE = ASSETS / "Scenes" / "ShrineGlade.hyscene"
 
@@ -189,7 +189,7 @@ def material_of(templates, tag: str) -> int:
     meshes = [e for e in found if "MeshComponent" in e and e["MeshComponent"].get("Materials")]
     if meshes:
         return meshes[0]["MeshComponent"]["Materials"][0]["MaterialHandle"]
-    path = ROOT / "Oxygen" / "project" / "Assets" / GROUND_MATERIALS[tag]
+    path = ROOT / "Project" / "Assets" / GROUND_MATERIALS[tag]
     return int(path.read_text().split("\n", 1)[0].split()[1])
 
 

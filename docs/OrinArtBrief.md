@@ -37,7 +37,7 @@ West-facing like Miko's battle exports: the enemies stand on the left.
 
 The stand-in's handles are fixed in `build_orin_standin.py` (field texture 6290817403346251521, field animations 4415580237915726709, battle texture 7924613408950187331, battle animations 3182937116204411939). Writing the real sheets under the same handles replaces the stand-in everywhere at once:
 
-- **Field**: `python scripts/characters/build_npc_idle.py <idle export> Oxygen/project/Assets/Characters/Player/Orin Orin_Field --walk <walk export> --handles 6290817403346251521 4415580237915726709` (rows Idle and Walk in four directions; `Npc Orin` plays `IdleRight`).
+- **Field**: `python scripts/characters/build_npc_idle.py <idle export> Project/Assets/Characters/Player/Orin Orin_Field --walk <walk export> --handles 6290817403346251521 4415580237915726709` (rows Idle and Walk in four directions; `Npc Orin` plays `IdleRight`).
 - **Battle**: `build_miko_battle.py` is written for Miko (her palette, the hair bell, her punch and kick picks); a hero version taking the exports above and writing `Orin.png` / `Orin.hyanim` in the same layout (96 x 96 cells, centred pivot, feet 15 px above the cell's bottom, clips `BattleIdle`, `WalkLeft`, `WalkRight`, `Slash`, `Thrust`, `Death`, and `Punch` / `Kick` as aliases of `Slash` for the plain Attack's alternation) is a small change once the exports exist.
 - **Portrait**: `Orin.hydef`'s `Portrait` is the field sheet; `PortraitSprite` 0 is `IdleDown_0`.
 - Then delete `build_orin_standin.py` (or keep it only as a fallback) and note the change in `docs/TestBed.md`.

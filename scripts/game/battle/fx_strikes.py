@@ -27,7 +27,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[3]
-ASSETS = ROOT / "Oxygen" / "project" / "Assets"
+ASSETS = ROOT / "Project" / "Assets"
 OUT_DIR = ASSETS / "Battle"
 TEXTURE = "FX_Strikes.png"
 CELL = 96

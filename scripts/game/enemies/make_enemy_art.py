@@ -25,7 +25,7 @@ from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[3]
-ENEMIES = ROOT / "Oxygen" / "project" / "Assets" / "Characters" / "Enemy"
+ENEMIES = ROOT / "Project" / "Assets" / "Characters" / "Enemy"
 
 
 def hexc(value: str) -> tuple:

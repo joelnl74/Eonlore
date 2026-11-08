@@ -21,7 +21,7 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parents[3]
-SCENE = ROOT / "Oxygen" / "project" / "Assets" / "Scenes" / "Battle.hyscene"
+SCENE = ROOT / "Project" / "Assets" / "Scenes" / "Battle.hyscene"
 
 # PartyState::MaxFighters slots: the floor point each one's feet stand on, and the sheet it shows in the editor
 # (texture, animations, sprite name); the battle dresses it from the hero's data.

@@ -9,7 +9,7 @@ Every field asset is drawn at **one density: 32 texture pixels per metre**, with
 - **Sprites**: the renderer draws a sprite as a 1 x 1 m quad times the transform's scale. `PixelsPerUnit` does **not** change the drawn size; it is only what the inspector's **Set Native Size** button uses. So keep `PixelsPerUnit: 32` on field art and size sprites with Set Native Size (scale = sprite pixels / 32), never by eye.
 - **Built-in shapes** (Plane, Box, Stairs): texture width x the material's `Tiling` (repeats per metre) = 32. A 320 px grass texture takes `Tiling: 0.1`.
 - **Models** (the medieval kit `.glb`s): UVs authored at 32 texels per metre in `MV_Kit.blend` (`build_kit.py`). Decals that are one picture (door, window glass, signs) may be up to 1.25x finer.
-- **Check it**: `python scripts/check_texel_density.py Oxygen/project/Assets/Scenes/FarmVillage.hyscene` lists every sprite, shape material and model material outside the tolerance (`--all` lists everything, `--strict` fails the run).
+- **Check it**: `python scripts/check_texel_density.py Project/Assets/Scenes/FarmVillage.hyscene` lists every sprite, shape material and model material outside the tolerance (`--all` lists everything, `--strict` fails the run).
 
 **Proportions** (measured on Octopath Traveler II screenshots for the overall feel, not its sprite sizes): a door is about 1.35x the character's height, a field character fills about 13-14 % of the view height, and the environment's pixels are about the size of the characters' pixels. With our 32 texels per metre that means an adult of 1.55 to 1.75 m is **50 to 56 px tall**, a 2.2 m door is 70 px, and the field camera shows about 12 m vertically (`OrthographicSize` about 12).
 

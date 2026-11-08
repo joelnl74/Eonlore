@@ -23,7 +23,7 @@ sys.path.insert(0, HERE)
 import terrain_mesher as tm  # noqa: E402
 
 REPO = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
-ASSETS = os.path.join(REPO, "Oxygen", "project", "Assets")
+ASSETS = os.path.join(REPO, "Project", "Assets")
 
 
 def handle_of(relative_path):

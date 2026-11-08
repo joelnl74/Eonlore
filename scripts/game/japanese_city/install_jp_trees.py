@@ -23,7 +23,7 @@ sys.path.insert(0, HERE)
 import build_city_scene as city  # noqa: E402  (stable_handle)
 
 REPO = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
-ASSETS = os.path.join(REPO, "Oxygen", "project", "Assets")
+ASSETS = os.path.join(REPO, "Project", "Assets")
 SRC = os.path.join(REPO, "art_incoming", "jp_city", "trees_r1")
 BACKUP = os.path.join(REPO, "art_incoming", "jp_city", "_backup", "stand_in_trees_2026-11-02")
 TREES = os.path.join(ASSETS, "Sprites", "Trees")

@@ -1,4 +1,4 @@
-"""Writes Oxygen/project/Assets/Scenes/TempleDistrict.hyscene: the temple district above the city, reached from the
+"""Writes Project/Assets/Scenes/TempleDistrict.hyscene: the temple district above the city, reached from the
 merchant street's west end (the city slice's "Exit TempleDistrict") and laid out after the Nov 2 reference (a stone
 stair between castle-stone walls up to a vermilion gate, the main hall and a five-storey pagoda beyond it, black
 pines and red maples, a water basin and low plaster walls in the foreground):

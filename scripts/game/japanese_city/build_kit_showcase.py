@@ -1,4 +1,4 @@
-"""Writes Oxygen/project/Assets/Scenes/JapaneseCityKit_Showcase.hyscene: the Japanese city kit's buildings in three
+"""Writes Project/Assets/Scenes/JapaneseCityKit_Showcase.hyscene: the Japanese city kit's buildings in three
 rows (A rich incl. the city gate, B middle, C poor incl. the harbour sheds) on a flat floor, with Miko (playable) and a
 placeholder villager at the start of every row for scale. Not a city layout: that is a later session
 (JP_CITY_SCENE_PLAN.md).
@@ -21,7 +21,7 @@ import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
-ASSETS = os.path.join(REPO, "Oxygen", "project", "Assets")
+ASSETS = os.path.join(REPO, "Project", "Assets")
 MODELS = os.path.join(ASSETS, "Models", "JapaneseCity")
 SUMMARY = os.path.join(MODELS, "Source", "JP_Kit", "kit_summary.json")
 SCENE = os.path.join(ASSETS, "Scenes", "JapaneseCityKit_Showcase.hyscene")

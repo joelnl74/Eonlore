@@ -1,4 +1,4 @@
-"""Draw the runtime UI's frames, ribbons and markers (Oxygen/project/Assets/UI) for the 1920 x 1080 canvas (D5).
+"""Draw the runtime UI's frames, ribbons and markers (Project/Assets/UI) for the 1920 x 1080 canvas (D5).
 
 Original art in the game's own craft language (docs/StyleGuide.md, the art guide's UI chapter): dark ink surfaces,
 bronze fittings, washi paper, shrine-red accents. Everything is drawn here at 4x and scaled down, so the edges are
@@ -18,7 +18,7 @@ import random
 
 from PIL import Image, ImageDraw, ImageFilter
 
-OUT = os.path.join(os.path.dirname(__file__), "..", "..", "..", "Oxygen", "project", "Assets", "UI")
+OUT = os.path.join(os.path.dirname(__file__), "..", "..", "..", "Project", "Assets", "UI")
 S = 4  # supersampling
 
 INK = (14, 17, 26)
