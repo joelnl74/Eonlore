@@ -16,3 +16,9 @@ Runtime UI work (canvases, text, buttons, focus, pointer, menus) is checked in `
 
 3D renderer work (meshes, lighting, shadows, post-processing) is checked in `Project/Assets/Scenes/ShrineGlade.hyscene` instead: a hillside shrine mixing meshes and upright sprites, built by `scripts/shrine_glade/build.py` (see `docs/TestBed.md` (here), "Shrine Glade"). **That builder (and `scripts/farm_village/`) is not in the repository or the user's folder right now**; until it is restored, edit the scenes in the editor and say so.
 
+## Working from a cloud session
+
+- **Reading**: clone `https://github.com/joelnl74/Hydro` and `https://github.com/joelnl74/Eonlore` side by side (`Hydro/`, `Eonlore/`); both are public. They only have what is pushed; ask the user what is uncommitted.
+- **Checking**: `bash scripts/check.sh [files...]` and `bash scripts/check.sh --tests` (Hydro next to this repository, or `HYDRO_DIR`). Not a build: say the change still needs an MSVC Debug build (`scripts\Build.bat Debug`).
+- **Engine changes** go to the Hydro repository first; then `engine.lock` here is set to that Hydro commit, in the same game commit that needs it.
+- **Pushing**: never commit or push without an explicit yes; scratch branches are `claude/<topic>`; never push to `main`.

@@ -5,10 +5,10 @@ import bpy, bmesh, math, os, sys
 from mathutils import Matrix, Vector
 from pathlib import Path
 
-ROOT = Path(r"C:\Users\joeln\Hydro\Projects\Eonlore\Project\Assets\Models\MedievalVillage")
+ROOT = Path(r"C:\Users\joeln\Eonlore\Project\Assets\Models\MedievalVillage")
 SRC = ROOT / "Source" / "MV_Kit"
 TEX = Path(os.environ["MV_TEX"]) if os.environ.get("MV_TEX") else SRC / "Textures"   # MV_TEX: try other textures
-SG = Path(r"C:\Users\joeln\Hydro\Projects\Eonlore\Project\Assets")   # Assets root since the Oct 30, 2026 restructure
+SG = Path(r"C:\Users\joeln\Eonlore\Project\Assets")   # Assets root since the Oct 30, 2026 restructure
 PPM = 32.0
 
 # ------------------------------------------------------------------ reset
