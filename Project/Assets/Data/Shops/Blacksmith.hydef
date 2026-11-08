@@ -1,0 +1,13 @@
+Handle: 4170337434094240690
+Definition:
+  Version: 1
+  Type: InventoryDefinition
+  Values:
+    Items:
+      - Item: {Table: 4741649512266718899, Row: IronSword}
+        Count: 1
+      - Item: {Table: 4741649512266718899, Row: LeatherBoots}
+        Count: 1
+      - Item: {Table: 4741649512266718899, Row: CopperOre}
+        Count: 5
+    Money: 0

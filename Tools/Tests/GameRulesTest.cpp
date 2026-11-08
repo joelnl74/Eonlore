@@ -1,5 +1,5 @@
 // Tools/DataTests/GameRulesTest.cpp
-// The game's rules (Game/src/Rules: BattleRules, LootRules, Scripting plan SC8d; OccluderRules, RouteRules) on fixed numbers: no scene, no data
+// The game's rules (Game/src/Rules: BattleRules, LootRules, NpcRules, ShopRules; OccluderRules, PartyRules, QuestRules, RouteRules) on fixed numbers: no scene, no data
 // files, every random draw given. Built into DataRoundTripTest by scripts/test_data.sh.
 
 #include "hypch.h"
@@ -9,6 +9,8 @@
 #include "Rules/PartyRules.h"
 #include "Rules/QuestRules.h"
 #include "Rules/RouteRules.h"
+#include "Rules/ShopRules.h"
+#include "Rules/NpcRules.h"
 
 #include <cstdio>
 #include <deque>
@@ -269,6 +271,142 @@ namespace Hydro
 		RULE_CHECK(RouteRules::RollStop(1.0f, 0.99f) && RouteRules::RollStop(0.0f, 0.0f) == false);
 		RULE_CHECK(RouteRules::IsInTheWay({ 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.8f, 0.1f, 0.0f }, 0.9f));
 		RULE_CHECK(RouteRules::IsInTheWay({ 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { -0.8f, 0.0f, 0.0f }, 0.9f) == false);
+
+		std::printf("Game rules: shop buy and sell\n");
+		auto makeItem = [](int price, ItemKind kind)
+		{
+			ItemDefinition def{};
+			def.Price = price;
+			def.Kind = kind;
+			return def;
+		};
+
+		DataRowRef potion{ 1, "Potion" };
+		DataRowRef keyItem{ 1, "KeyRing" };
+		DataRowRef ether{ 1, "Ether" };
+		InventoryDefinition stock{};
+		stock.Items.push_back(InventoryEntry{ potion, 1 });
+
+		// Buy: exactly enough money -> money becomes 0.
+		{
+			Inventory inv{};
+			inv.Money = 10;
+			RULE_CHECK(ShopRules::Buy(inv, stock, potion, makeItem(5, ItemKind::Consumable), 2) == ShopRules::BuyResult::Bought && inv.Money == 0);
+		}
+		// Buy: not enough money -> nothing changes.
+		{
+			Inventory inv{};
+			inv.Money = 9;
+			RULE_CHECK(ShopRules::Buy(inv, stock, potion, makeItem(5, ItemKind::Consumable), 2) == ShopRules::BuyResult::NotEnoughMoney && inv.Money == 9);
+		}
+		// Buy: price 0 -> NotForSale.
+		{
+			Inventory inv{};
+			inv.Money = 100;
+			RULE_CHECK(ShopRules::Buy(inv, stock, potion, makeItem(0, ItemKind::Consumable), 1) == ShopRules::BuyResult::NotForSale);
+		}
+		// Buy: count < 1 -> BadCount.
+		{
+			Inventory inv{};
+			inv.Money = 100;
+			RULE_CHECK(ShopRules::Buy(inv, stock, potion, makeItem(5, ItemKind::Consumable), 0) == ShopRules::BuyResult::BadCount);
+		}
+		// Buy: already in the bag -> count grows.
+		{
+			Inventory inv{};
+			inv.Money = 10;
+			inv.Add(potion, 3);
+			ShopRules::Buy(inv, stock, potion, makeItem(5, ItemKind::Consumable), 2);
+			RULE_CHECK(inv.CountOf(potion) == 5 && inv.Money == 0);
+		}
+
+		// Sell: the last one.
+		{
+			Inventory inv{};
+			inv.Money = 0;
+			inv.Add(potion, 1);
+			RULE_CHECK(ShopRules::Sell(inv, potion, makeItem(10, ItemKind::Consumable), 1) == ShopRules::SellResult::Sold && inv.Money == 5 && inv.CountOf(potion) == 0);
+		}
+		// Sell: more than you have -> NoneLeft, nothing changes.
+		{
+			Inventory inv{};
+			inv.Money = 0;
+			inv.Add(potion, 1);
+			RULE_CHECK(ShopRules::Sell(inv, potion, makeItem(10, ItemKind::Consumable), 5) == ShopRules::SellResult::NoneLeft && inv.CountOf(potion) == 1 && inv.Money == 0);
+		}
+		// Sell: key item -> NotSellable.
+		{
+			Inventory inv{};
+			inv.Money = 0;
+			inv.Add(keyItem, 3);
+			RULE_CHECK(ShopRules::Sell(inv, keyItem, makeItem(50, ItemKind::KeyItem), 1) == ShopRules::SellResult::NotSellable && inv.Money == 0);
+		}
+		// Sell: odd price (7) -> sells for 3 (rounded down).
+		{
+			Inventory inv{};
+			inv.Money = 0;
+			inv.Add(potion, 1);
+			RULE_CHECK(ShopRules::Sell(inv, potion, makeItem(7, ItemKind::Consumable), 1) == ShopRules::SellResult::Sold && inv.Money == 3);
+		}
+		// Buy: more than a stack at once -> BadCount.
+		{
+			Inventory inv{};
+			inv.Money = 100000;
+			RULE_CHECK(ShopRules::Buy(inv, stock, potion, makeItem(5, ItemKind::Consumable), ShopRules::MaxStack + 1) == ShopRules::BuyResult::BadCount && inv.Money == 100000);
+		}
+		// Buy: would go past a full stack -> BagFull, nothing changes; up to exactly a full stack is fine.
+		{
+			Inventory inv{};
+			inv.Money = 100;
+			inv.Add(potion, ShopRules::MaxStack - 1);
+			RULE_CHECK(ShopRules::Buy(inv, stock, potion, makeItem(5, ItemKind::Consumable), 2) == ShopRules::BuyResult::BagFull && inv.Money == 100);
+			RULE_CHECK(inv.CountOf(potion) == ShopRules::MaxStack - 1);
+			RULE_CHECK(ShopRules::Buy(inv, stock, potion, makeItem(5, ItemKind::Consumable), 1) == ShopRules::BuyResult::Bought && inv.CountOf(potion) == ShopRules::MaxStack);
+		}
+		// Sell: price 1 -> still sells for 1, not 0.
+		{
+			Inventory inv{};
+			inv.Money = 0;
+			inv.Add(potion, 2);
+			RULE_CHECK(ShopRules::Sell(inv, potion, makeItem(1, ItemKind::Consumable), 2) == ShopRules::SellResult::Sold && inv.Money == 2);
+		}
+		// Sell: price 0 -> NotSellable.
+		{
+			Inventory inv{};
+			inv.Money = 0;
+			inv.Add(potion, 1);
+			RULE_CHECK(ShopRules::Sell(inv, potion, makeItem(0, ItemKind::Consumable), 1) == ShopRules::SellResult::NotSellable && inv.Money == 0);
+		}
+
+		// Buy: not in this shop's stock -> NotForSale, nothing changes.
+		{
+			Inventory inv{};
+			inv.Money = 100;
+			RULE_CHECK(ShopRules::Buy(inv, stock, ether, makeItem(5, ItemKind::Consumable), 1) == ShopRules::BuyResult::NotForSale);
+			RULE_CHECK(inv.Money == 100 && inv.CountOf(ether) == 0);
+			RULE_CHECK(ShopRules::InStock(stock, potion) && ShopRules::InStock(stock, ether) == false);
+			RULE_CHECK(ShopRules::InStock(InventoryDefinition{}, potion) == false);
+		}
+		// CanSell: priced and not a key item; Sell agrees with it.
+		RULE_CHECK(ShopRules::CanSell(makeItem(10, ItemKind::Consumable)) && ShopRules::CanSell(makeItem(10, ItemKind::Equipment)));
+		RULE_CHECK(ShopRules::CanSell(makeItem(0, ItemKind::Material)) == false && ShopRules::CanSell(makeItem(50, ItemKind::KeyItem)) == false);
+
+		std::printf("Game rules: NPC choices\n");
+		{
+			RULE_CHECK(NpcRules::Options(false, false, false).empty());
+			const std::vector<NpcOption> talk = NpcRules::Options(true, false, false);
+			RULE_CHECK(talk.size() == 1 && talk[0] == NpcOption::Talk);
+			const std::vector<NpcOption> quest = NpcRules::Options(false, true, false);
+			RULE_CHECK(quest.size() == 1 && quest[0] == NpcOption::Quest);
+			const std::vector<NpcOption> shop = NpcRules::Options(false, false, true);
+			RULE_CHECK(shop.size() == 1 && shop[0] == NpcOption::Shop);
+			const std::vector<NpcOption> talkShop = NpcRules::Options(true, false, true);
+			RULE_CHECK(talkShop == std::vector<NpcOption>({ NpcOption::Talk, NpcOption::Shop, NpcOption::Leave }));
+			const std::vector<NpcOption> all = NpcRules::Options(true, true, true);
+			RULE_CHECK(all == std::vector<NpcOption>({ NpcOption::Talk, NpcOption::Quest, NpcOption::Shop, NpcOption::Leave }));
+			const std::vector<NpcOption> questShop = NpcRules::Options(false, true, true);
+			RULE_CHECK(questShop == std::vector<NpcOption>({ NpcOption::Quest, NpcOption::Shop, NpcOption::Leave }));
+		}
 
 		return s_RuleFailures;
 	}

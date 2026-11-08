@@ -163,7 +163,8 @@ namespace Hydro
 			.Table()
 			.DisplayField("Name")
 			.Field<&NpcDefinition::Name>("Name", "Name").Tooltip("The name on the dialogue box (when the dialogue has no speaker of its own)")
-			.Field<&NpcDefinition::Dialogue>("Dialogue", "Dialogue").Tooltip("What they say when the player talks to them").AssetFilter(AssetType::Definition).DataTypeFilter("DialogueDefinition");
+			.Field<&NpcDefinition::Dialogue>("Dialogue", "Dialogue").Tooltip("What they say when the player talks to them").AssetFilter(AssetType::Definition).DataTypeFilter("DialogueDefinition")
+			.Field<&NpcDefinition::Shop>("Shop", "Shop").Tooltip("What this NPC sells (0: not a merchant)").AssetFilter(AssetType::Definition).DataTypeFilter("InventoryDefinition");
 
 		DataTypeRegistry::Register<SignDefinition>("SignDefinition", "Sign")
 			.Table()
@@ -190,7 +191,8 @@ namespace Hydro
 			.Field<&ItemDefinition::RestoreMP>("RestoreMP", "Restore MP").Range(0.0f, 999.0f).Tooltip("Restored to every hero when used")
 			.Field<&ItemDefinition::UsableInField>("UsableInField", "Usable In Field").Tooltip("Can be used from the field inventory")
 			.Field<&ItemDefinition::Slot>("Slot", "Slot").Tooltip("Equipment: the slot it goes in (None: not equipment)")
-			.Field<&ItemDefinition::Bonus>("Bonus", "Bonus").Tooltip("Equipment: added to the wearer's numbers");
+			.Field<&ItemDefinition::Bonus>("Bonus", "Bonus").Tooltip("Equipment: added to the wearer's numbers")
+			.Field<&ItemDefinition::Price>("Price", "Price").Range(0.0f, 99999.0f).Tooltip("Price in aster at a shop; 0: not sold in shops");
 
 		DataTypeRegistry::Register<LootEntry>("LootEntry", "Loot Entry")
 			.Field<&LootEntry::Item>("Item", "Item").DataTypeFilter("ItemDefinition")

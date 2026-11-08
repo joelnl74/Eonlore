@@ -1,0 +1,13 @@
+Handle: 4501811387492302161
+Definition:
+  Version: 1
+  Type: InventoryDefinition
+  Values:
+    Items:
+      - Item: {Table: 4741649512266718899, Row: Potion}
+        Count: 5
+      - Item: {Table: 4741649512266718899, Row: Antidote}
+        Count: 5
+      - Item: {Table: 4741649512266718899, Row: HerbTea}
+        Count: 5
+    Money: 0

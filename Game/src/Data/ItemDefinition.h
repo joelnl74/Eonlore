@@ -66,6 +66,8 @@ namespace Hydro
 		EquipSlot Slot = EquipSlot::None;
 		HY_PROPERTY(Tooltip("Equipment: added to the wearer's numbers"))
 		CombatStats Bonus{ 0, 0, 0, 0, 0 };
+		HY_PROPERTY(Range(0, 99999), Tooltip("Price in aster at a shop; 0: not sold in shops"))
+		int Price = 0;
 
 		bool CanUseInField() const
 		{

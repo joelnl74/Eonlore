@@ -1,0 +1,11 @@
+Handle: 7486585548345975015
+Definition:
+  Version: 1
+  Type: InventoryDefinition
+  Values:
+    Items:
+      - Item: {Table: 4741649512266718899, Row: Ether}
+        Count: 5
+      - Item: {Table: 4741649512266718899, Row: HerbTea}
+        Count: 5
+    Money: 0

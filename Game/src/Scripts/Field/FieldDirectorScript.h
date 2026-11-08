@@ -8,8 +8,12 @@
 #include "Data/LootDefinition.h"
 #include "Rules/ItemRules.h"
 #include "Rules/LootRules.h"
+#include "Rules/NpcRules.h"
+#include "Rules/ShopRules.h"
 #include "Scripts/Common/DioramaCamera.h"
 #include "Scripts/Field/FieldMenuView.h"
+#include "Scripts/Field/NpcChoiceView.h"
+#include "Scripts/Field/ShopView.h"
 #include "State/BattleState.h"
 #include "State/PartyState.h"
 #include "State/Inventory.h"
@@ -41,8 +45,9 @@ namespace Hydro
 		Inventory, EnterUse, EscClose,
 		PromptRead, PromptOpen, PromptEnter, PromptSave, PromptLeave, PromptTalk,
 		ChestEmpty, Rested, RestedLine2, Saved, SaveFailed, NothingToLoad, RoadGoesOn, ToTheVillage,
-		UsedPotion, NotUsableHere, NoneLeft, SignBlank,
-		Count
+		UsedPotion, NotUsableHere, NoneLeft, SignBlank, ChoiceTalk, ChoiceQuest, ChoiceShop, ChoiceLeave,
+		ShopBuy, ShopSell, ShopBought, ShopSold, ShopNoMoney, ShopBagFull, ShopCantSell, ShopNothingToSell,
+		ShopHelp, ShopNotForSale, Count
 	};
 
 	inline const char* GetFieldText(FieldLabel label)
@@ -70,6 +75,20 @@ namespace Hydro
 		case FieldLabel::NotUsableHere: return "Not usable here.";
 		case FieldLabel::NoneLeft: return "None left.";
 		case FieldLabel::SignBlank: return "The sign is too weathered to read.";
+		case FieldLabel::ChoiceTalk: return "Talk";
+		case FieldLabel::ChoiceQuest: return "Quest";
+		case FieldLabel::ChoiceShop: return "Buy & Sell";
+		case FieldLabel::ChoiceLeave: return "Leave";
+		case FieldLabel::ShopBuy: return "Buy";
+		case FieldLabel::ShopSell: return "Sell";
+		case FieldLabel::ShopBought: return "Bought.";
+		case FieldLabel::ShopSold: return "Sold.";
+		case FieldLabel::ShopNoMoney: return "Not enough aster.";
+		case FieldLabel::ShopBagFull: return "You can't carry any more.";
+		case FieldLabel::ShopCantSell: return "That can't be sold.";
+		case FieldLabel::ShopNothingToSell: return "Nothing to sell.";
+		case FieldLabel::ShopHelp: return "Enter  Buy / sell one        Left / Right  Buy or sell        Esc  Leave";
+		case FieldLabel::ShopNotForSale: return "That isn't sold here.";
 		default: return "";
 		}
 	}
@@ -144,6 +163,8 @@ namespace Hydro
 			m_Fade.Bind(scene);
 			m_Banner.Bind(scene);
 			m_Menu.Bind(scene);
+			m_Choice.Bind(scene);
+			m_Shop.Bind(scene);
 			m_DialogueCanvas = Find(scene, "Dialogue Canvas");
 
 			PartyState::Get().Start();
@@ -271,6 +292,13 @@ namespace Hydro
 			{
 				m_Menu.CycleHero(nextHero ? 1 : -1);
 			}
+			// The UI has no events for Left/Right, so the shop's Buy/Sell switch is polled here.
+			const bool left = KeyPressed(KeyCode::Left, m_Previous[4]);
+			const bool right = KeyPressed(KeyCode::Right, m_Previous[5]);
+			if (m_Shop.IsOpen() && (left || right))
+			{
+				m_Shop.SwitchMode();
+			}
 			if (UI::CapturesInput(scene))
 			{
 				m_PromptView.Hide();
@@ -285,6 +313,38 @@ namespace Hydro
 
 		bool OnUIEvent(const UIEvent& event) override
 		{
+			NpcChoiceView::Request choice = NpcChoiceView::Request::None;
+			if (m_Choice.HandleEvent(event, choice))
+			{
+				if (choice == NpcChoiceView::Request::Pick)
+				{
+					const NpcOption picked = m_Choice.GetPicked();
+					m_Choice.Hide();
+					RunNpcOption(*GetEntity().GetScene(), picked);
+				}
+				else if (choice == NpcChoiceView::Request::Cancel)
+				{
+					m_Choice.Hide();
+				}
+				return true;
+			}
+			ShopView::Request shop = ShopView::Request::None;
+			if (m_Shop.HandleEvent(event, shop))
+			{
+				if (shop == ShopView::Request::Buy)
+				{
+					BuySelected();
+				}
+				else if (shop == ShopView::Request::Sell)
+				{
+					SellSelected();
+				}
+				else if (shop == ShopView::Request::Close)
+				{
+					m_Shop.Close();
+				}
+				return true;
+			}
 			FieldMenuView::Request request = FieldMenuView::Request::None;
 			if (m_Menu.HandleEvent(event, request) == false)
 			{
@@ -521,36 +581,8 @@ namespace Hydro
 					StartLeaving(nearest->Target, false);
 					break;
 				case Kind::Npc:
-					// A quest may have its own words for this NPC.
-					if (QuestLog::Get().Talk(nearest->Target))
-					{
-						m_PromptView.Hide();
-						break;
-					}
-					{
-						// An NPC without a row of its own says the "Default" row's lines under its own (tag) name.
-						bool usedDefault = false;
-						const DataView<NpcDefinition> npc = FindNamedRow<NpcDefinition>(NpcTable, nearest->Target, &usedDefault);
-						const DataView<DialogueDefinition> lines = npc.IsValid() ? Data::Get<DialogueDefinition>(npc->Dialogue)
-							: DataView<DialogueDefinition>();
-						const std::string name = npc.IsValid() && usedDefault == false && npc->Name.empty() == false ? npc->Name : nearest->Target;
-						if (lines.IsValid() == false || lines->Lines.empty())
-						{
-							HY_WARN("Field: '{}' has nothing to say (no row or dialogue for it in the NPC table)", nearest->Target);
-							break;
-						}
-						if (DialogueScript* dialogue = FindDialogue(scene))
-						{
-							dialogue->Open(*lines, name);
-							m_PromptView.Hide();
-						}
-						else
-						{
-							// A scene without the dialogue box: one line at a time in the message box.
-							ShowMessage(lines->Lines[(size_t)m_NpcLine % lines->Lines.size()].Text);
-							m_NpcLine++;
-						}
-					}
+					m_PromptView.Hide();
+					InteractWithNpc(scene, nearest->Target);
 					break;
 			}
 		}
@@ -701,6 +733,179 @@ namespace Hydro
 				case Kind::Gather: return "E  Gather";
 				default: return "E  Read";
 			}
+		}
+
+		// ---- NPCs: talk, quest, shop ---------------------------------------------------------------------
+
+		// What the NPC offers (NpcRules): one thing runs at once (as before the menu), more open the choice menu.
+		void InteractWithNpc(Scene& scene, const std::string& npc)
+		{
+			m_ChoiceNpc = npc;
+			bool usedDefault = false;
+			const DataView<NpcDefinition> row = FindNamedRow<NpcDefinition>(NpcTable, npc, &usedDefault);
+			const DataView<DialogueDefinition> lines = row.IsValid() ? Data::Get<DialogueDefinition>(row->Dialogue)
+				: DataView<DialogueDefinition>();
+			const bool hasLines = lines.IsValid() && lines->Lines.empty() == false;
+			const bool hasQuest = QuestLog::Get().IsClaimed(npc);
+			const bool hasShop = ShopStock(npc).IsValid();
+			const std::vector<NpcOption> options = NpcRules::Options(hasLines, hasQuest, hasShop);
+			if (options.empty())
+			{
+				HY_WARN("Field: '{}' has nothing to say (no row or dialogue for it in the NPC table)", npc);
+				return;
+			}
+			if (options.size() == 1)
+			{
+				RunNpcOption(scene, options[0]);
+				return;
+			}
+			std::vector<std::string> labels;
+			for (const NpcOption option : options)
+			{
+				labels.push_back(GetFieldText(ChoiceLabel(option)));
+			}
+			m_Choice.Show(NpcName(npc), options, labels);
+		}
+
+		void RunNpcOption(Scene& scene, NpcOption option)
+		{
+			switch (option)
+			{
+				case NpcOption::Talk:
+					TalkTo(scene, m_ChoiceNpc);
+					break;
+				case NpcOption::Quest:
+					// The quest script that claimed this NPC takes the conversation (QuestLog::TakeTalk), as an E press did before.
+					QuestLog::Get().Talk(m_ChoiceNpc);
+					break;
+				case NpcOption::Shop:
+					OpenShop(m_ChoiceNpc);
+					break;
+				case NpcOption::Leave:
+					break;
+			}
+		}
+
+		// An NPC without a row of its own says the "Default" row's lines under its own (tag) name.
+		void TalkTo(Scene& scene, const std::string& npc)
+		{
+			const DataView<NpcDefinition> row = FindNamedRow<NpcDefinition>(NpcTable, npc);
+			const DataView<DialogueDefinition> lines = row.IsValid() ? Data::Get<DialogueDefinition>(row->Dialogue)
+				: DataView<DialogueDefinition>();
+			if (lines.IsValid() == false || lines->Lines.empty())
+			{
+				return;
+			}
+			if (DialogueScript* dialogue = FindDialogue(scene))
+			{
+				dialogue->Open(*lines, NpcName(npc));
+			}
+			else
+			{
+				// A scene without the dialogue box: one line at a time in the message box.
+				ShowMessage(lines->Lines[(size_t)m_NpcLine % lines->Lines.size()].Text);
+				m_NpcLine++;
+			}
+		}
+
+		std::string NpcName(const std::string& npc) const
+		{
+			bool usedDefault = false;
+			const DataView<NpcDefinition> row = FindNamedRow<NpcDefinition>(NpcTable, npc, &usedDefault);
+			return row.IsValid() && usedDefault == false && row->Name.empty() == false ? row->Name : npc;
+		}
+
+		// The NPC's own row's goods (the "Default" row never sells); invalid when it isn't a merchant.
+		DataView<InventoryDefinition> ShopStock(const std::string& npc) const
+		{
+			bool usedDefault = false;
+			const DataView<NpcDefinition> row = FindNamedRow<NpcDefinition>(NpcTable, npc, &usedDefault);
+			if (row.IsValid() == false || usedDefault || (uint64_t)row->Shop == 0)
+			{
+				return DataView<InventoryDefinition>();
+			}
+			return Data::Get<InventoryDefinition>(row->Shop);
+		}
+
+		void OpenShop(const std::string& npc)
+		{
+			const DataView<InventoryDefinition> stock = ShopStock(npc);
+			if (stock.IsValid() == false)
+			{
+				return;
+			}
+			m_Shop.Open(NpcName(npc), *stock, GetFieldText(FieldLabel::ShopHelp));
+			HY_INFO("Field: {}'s shop ({} goods)", npc, stock->Items.size());
+		}
+
+		void BuySelected()
+		{
+			const DataRowRef row = m_Shop.GetSelectedItem();
+			const DataView<ItemDefinition> item = Data::GetRow<ItemDefinition>(row);
+			const DataView<InventoryDefinition> stock = ShopStock(m_ChoiceNpc);
+			if (item.IsValid() == false || stock.IsValid() == false)
+			{
+				return;
+			}
+			switch (ShopRules::Buy(Inventory::Get(), *stock, row, *item, 1))
+			{
+				case ShopRules::BuyResult::Bought:
+					ShowMessage(FieldLabel::ShopBought);
+					HY_INFO("Field: bought {} ({} aster left)", item->Name, Inventory::Get().Money);
+					break;
+				case ShopRules::BuyResult::NotEnoughMoney:
+					ShowMessage(FieldLabel::ShopNoMoney);
+					break;
+				case ShopRules::BuyResult::BagFull:
+					ShowMessage(FieldLabel::ShopBagFull);
+					break;
+				case ShopRules::BuyResult::NotForSale:
+				case ShopRules::BuyResult::BadCount:
+					ShowMessage(FieldLabel::ShopNotForSale);
+					break;
+			}
+			m_Shop.Present();
+			m_Shop.Focus();
+		}
+
+		void SellSelected()
+		{
+			const DataRowRef row = m_Shop.GetSelectedItem();
+			const DataView<ItemDefinition> item = Data::GetRow<ItemDefinition>(row);
+			if (item.IsValid() == false)
+			{
+				ShowMessage(FieldLabel::ShopNothingToSell);
+				return;
+			}
+			switch (ShopRules::Sell(Inventory::Get(), row, *item, 1))
+			{
+				case ShopRules::SellResult::Sold:
+					ShowMessage(FieldLabel::ShopSold);
+					HY_INFO("Field: sold {} ({} aster)", item->Name, Inventory::Get().Money);
+					break;
+				case ShopRules::SellResult::NotSellable:
+				case ShopRules::SellResult::BadCount:
+					ShowMessage(FieldLabel::ShopCantSell);
+					break;
+				case ShopRules::SellResult::NoneLeft:
+					ShowMessage(FieldLabel::NoneLeft);
+					break;
+			}
+			// A sold-out line leaves the list; Focus keeps the selection on it.
+			m_Shop.Present();
+			m_Shop.Focus();
+		}
+
+		static FieldLabel ChoiceLabel(NpcOption option)
+		{
+			switch (option)
+			{
+				case NpcOption::Talk: return FieldLabel::ChoiceTalk;
+				case NpcOption::Quest: return FieldLabel::ChoiceQuest;
+				case NpcOption::Shop: return FieldLabel::ChoiceShop;
+				case NpcOption::Leave: return FieldLabel::ChoiceLeave;
+			}
+			return FieldLabel::ChoiceLeave;
 		}
 
 		// ---- Messages ------------------------------------------------------------------------------------
@@ -982,6 +1187,9 @@ namespace Hydro
 		ScreenFadeView m_Fade;
 		MessageBannerView m_Banner;
 		FieldMenuView m_Menu;
+		NpcChoiceView m_Choice;
+		ShopView m_Shop;
+		std::string m_ChoiceNpc; // the NPC the choice menu or the shop is for
 		entt::entity m_DialogueCanvas = entt::null;
 		std::vector<Interactable> m_Interactables;
 		entt::entity m_Current = entt::null; // what the prompt shows

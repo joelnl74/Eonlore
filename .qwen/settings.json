@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(scripts\\build.bat *)",
+      "Bash(cmd /c \"scripts\\Build.bat *)",
+      "Bash(bash scripts/check.sh *)",
+      "Bash(py ..\\Hydro\\scripts\\lint_conventions.py *)",
+      "Bash(findstr *)"
+    ]
+  },
+  "$version": 4
+}

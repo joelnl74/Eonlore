@@ -261,6 +261,7 @@ def build_battle(director):
 
 FIELD_REMOVE = {
     "Field HUD Canvas", "Field Menu Canvas", "Inventory Canvas", "Dialogue Canvas", "Fade Canvas", "Prompt Canvas", "Quest Canvas",
+    "Choice Canvas", "Shop Canvas",
     "UI", "UI Prompt Panel", "UI Prompt Label",
 }
 
@@ -284,6 +285,7 @@ def build_field(scene_name, director, b=None):
     b.add("Field Message Text", panel, UIRectComponent=fill((48, 8, 48, 8)), UITextComponent=text("Found a Potion!", FONT_BODY, CREAM, "Center", wrap=True))
 
     build_field_menu(b, director)
+    build_shop_canvas(b, director)
 
     # Dialogue: washi paper at the bottom, the speaker's name in its corner, a vermilion "next" marker.
     dlg = b.add("Dialogue Canvas", director, UICanvasComponent=canvas(30, visible=False, captures=True),
@@ -293,6 +295,7 @@ def build_field(scene_name, director, b=None):
     b.add("Dialogue Text", box, UIRectComponent=fill((56, 30, 72, 72)), UITextComponent=text("...", FONT_BODY, INK_TEXT, "Left", "Top", wrap=True, shadow=False, spacing=1.15))
     b.add("Dialogue Next", box, UIRectComponent=rect((1, 0), None, (1, 0), (-28, 22), (28, 28), visible=False), UIImageComponent=image("Marker", nine=False))
 
+    build_choice_canvas(b, director)
     build_quest_canvas(b, director)
 
     # The fade to black over everything.
@@ -362,6 +365,65 @@ def build_field_menu(b, director):
     b.add("Help Bar Rule", help_bar, UIRectComponent=rect((0, 1), (1, 1), (0.5, 1), (0, 0), (0, 2)), UIImageComponent=image(None, (0.78, 0.63, 0.38, 0.6)))
     b.add("Help Text", help_bar, UIRectComponent=fill((72, 0, 72, 0)), UITextComponent=text("Select a category.", FONT_BODY, CREAM))
     b.add("Help Keys", help_bar, UIRectComponent=fill((72, 0, 72, 0)), UITextComponent=text("Enter  Open        Esc / Tab  Close", FONT_SMALL, DIM, "Right"))
+
+
+SHOP_ROWS = 10  # ShopView::MaxRows
+SHOP_GOODS = [("Potion", "25", "x3"), ("Hi-Potion", "75", "x1"), ("Antidote", "15", "x2"), ("Herb Tea", "12", "x2")]
+
+
+def build_shop_canvas(b, director):
+    """The shop (ShopView, Game/src/Scripts/Field/ShopView.h; docs/ShopPlan.md): over a dimmed scene like the field menu, the
+    merchant's name, the Buy / Sell headers (Left/Right switches; FieldDirectorScript polls the keys), the goods in a frame
+    with price and the count held, the selected item beside it, the money and a help bar. Under the message banner (Field HUD
+    Canvas, 20), so "Bought." shows over it."""
+    shop = b.add("Shop Canvas", director, UICanvasComponent=canvas(12, visible=False, captures=True))
+    b.add("Shop Dim", shop, UIRectComponent=fill(), UIImageComponent=image(None, (0.03, 0.04, 0.06, 0.62)))
+    b.add("Shop Title", shop, UIRectComponent=rect((0, 1), None, (0, 1), (72, -40), (900, 60)), UITextComponent=text("Pottery Merchant", FONT_TITLE, CREAM))
+    b.add("Shop Title Rule", shop, UIRectComponent=rect((0, 1), None, (0, 1), (56, -100), (560, 12)), UIImageComponent=image("Divider"))
+    b.add("Shop Mode Buy", shop, UIRectComponent=rect((0, 1), None, (0, 1), (80, -118), (140, 44)), UITextComponent=text("Buy", FONT_LABEL, GOLD))
+    b.add("Shop Mode Sell", shop, UIRectComponent=rect((0, 1), None, (0, 1), (220, -118), (140, 44)), UITextComponent=text("Sell", FONT_LABEL, DIM))
+
+    frame = b.add("Shop Panel", shop, UIRectComponent=rect((0, 1), None, (0, 1), (56, -230), (720, 720)), UIImageComponent=image("Frame"))
+    head = b.add("Shop Header", frame, UIRectComponent=rect((0, 1), (1, 1), (0.5, 1), (0, -26), (-52, 44)), UIImageComponent=image("Plate"))
+    b.add("Shop Header Text", head, UIRectComponent=fill((28, 0, 28, 0)), UITextComponent=text("Goods", FONT_LABEL, GOLD))
+    b.add("Shop Header Price", head, UIRectComponent=fill((28, 0, 122, 0)), UITextComponent=text("Price", FONT_SMALL, DIM, "Right"))
+    b.add("Shop Header Count", head, UIRectComponent=fill((28, 0, 28, 0)), UITextComponent=text("Owned", FONT_SMALL, DIM, "Right"))
+    rows = b.add("Shop List", frame, UIRectComponent=rect((0, 1), (1, 1), (0.5, 1), (0, -84), (-52, 100)), UILayoutGroupComponent=group(spacing=4))
+    for i in range(SHOP_ROWS):
+        name, price, count = SHOP_GOODS[i] if i < len(SHOP_GOODS) else ("", "", "")
+        row = ribbon_row(b, "Shop Row %d" % i, rows, 668, 56, name, count, "ShopRow")
+        b.add("Shop Row %d Price" % i, row, UIRectComponent=fill((66, 0, 150, 0)), UITextComponent=text(price, FONT_SMALL, GOLD, "Right"))
+
+    details = b.add("Shop Detail Panel", shop, UIRectComponent=rect((0, 1), None, (0, 1), (800, -230), (520, 320)), UIImageComponent=image("Frame"))
+    b.add("Shop Detail Name", details, UIRectComponent=rect((0, 1), (1, 1), (0.5, 1), (0, -28), (-72, 48)), UITextComponent=text("Potion", FONT_TITLE, GOLD))
+    b.add("Shop Detail Rule", details, UIRectComponent=rect((0, 1), (1, 1), (0.5, 1), (0, -80), (-60, 12)), UIImageComponent=image("Divider", (1, 1, 1, 0.7)))
+    b.add("Shop Detail Text", details, UIRectComponent=fill((36, 30, 36, 100)),
+          UITextComponent=text("A bitter brew of the shrine's herbs. Restores 25 HP.", FONT_BODY, CREAM, "Left", "Top", wrap=True))
+
+    purse = b.add("Shop Money", shop, UIRectComponent=rect((1, 0), None, (1, 0), (-40, 104), (440, 52)), UIImageComponent=image("Fade", (1, 1, 1, 0.9), flip_x=True, nine=False))
+    b.add("Shop Money Label", purse, UIRectComponent=fill((26, 0, 24, 0)), UITextComponent=text("Aster", FONT_LABEL, GOLD))
+    b.add("Shop Money Amount", purse, UIRectComponent=fill((26, 0, 24, 0)), UITextComponent=text("50", FONT_BODY, CREAM, "Right"))
+
+    help_bar = b.add("Shop Help Bar", shop, UIRectComponent=rect((0, 0), (1, 0), (0.5, 0), (0, 0), (0, 84)), UIImageComponent=image(None, (0.02, 0.02, 0.03, 0.94)))
+    b.add("Shop Help Bar Rule", help_bar, UIRectComponent=rect((0, 1), (1, 1), (0.5, 1), (0, 0), (0, 2)), UIImageComponent=image(None, (0.78, 0.63, 0.38, 0.6)))
+    b.add("Shop Help", help_bar, UIRectComponent=fill((72, 0, 72, 0)),
+          UITextComponent=text("Enter  Buy / sell one        Left / Right  Buy or sell        Esc  Leave", FONT_SMALL, DIM, "Right"))
+
+
+CHOICE_ROWS = 4  # NpcChoiceView::MaxRows
+
+
+def build_choice_canvas(b, director):
+    """The choice when an NPC offers more than one thing (NpcChoiceView, Game/src/Scripts/Field/NpcChoiceView.h): a small
+    frame bottom right with the NPC's name and ribbon rows (Talk / Quest / Buy & Sell / Leave); the script hides the unused
+    rows. Over the dialogue's place, so it reads as the start of the conversation."""
+    choice = b.add("Choice Canvas", director, UICanvasComponent=canvas(31, visible=False, captures=True))
+    panel = b.add("Choice Panel", choice, UIRectComponent=rect((1, 0), None, (1, 0), (-120, 290), (440, 10)), UIImageComponent=image("Frame"),
+                  UILayoutGroupComponent=group(spacing=6, padding=(28, 28, 28, 28)))
+    b.add("Choice Title", panel, UIRectComponent=rect(size=(384, 48)), UITextComponent=text("Pottery Merchant", FONT_TITLE, GOLD))
+    b.add("Choice Rule", panel, UIRectComponent=rect(size=(384, 12)), UIImageComponent=image("Divider", (1, 1, 1, 0.7)))
+    for i, name in enumerate(["Talk", "Quest", "Buy & Sell", "Leave"][:CHOICE_ROWS]):
+        ribbon_row(b, "Choice %d" % i, panel, 384, 56, name, "", "Choice")
 
 
 STAT_NAMES = ["Max HP", "Max MP", "Attack", "Magic", "Speed"]

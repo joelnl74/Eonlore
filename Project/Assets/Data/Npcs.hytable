@@ -9,6 +9,7 @@ DataTable:
     Blacksmith:
       Name: Blacksmith
       Dialogue: 552294734088370458
+      Shop: 4170337434094240690
     Default:
       Name: Anyone else
       Dialogue: 8285401502875637881
@@ -69,12 +70,15 @@ DataTable:
     PotteryMerchant:
       Name: Potter
       Dialogue: 8934795963015759287
+      Shop: 4501811387492302161
     SakeMerchant:
       Name: Sake Merchant
       Dialogue: 5812481699741625291
+      Shop: 7486585548345975015
     PaperMerchant:
       Name: Paper Merchant
       Dialogue: 1470308436504009792
+      Shop: 6427387197889945485
     GateGuard:
       Name: Gate Guard
       Dialogue: 3824359530807091376

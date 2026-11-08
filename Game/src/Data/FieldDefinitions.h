@@ -10,6 +10,9 @@
 // VillageElder, "Sign Shrine" -> Shrine).
 namespace Hydro
 {
+	// Forward-declare InventoryDefinition so Shop can reference it.
+	struct InventoryDefinition;
+
 	HY_DATA(Table, DisplayField(Name))
 	struct NpcDefinition
 	{
@@ -17,6 +20,10 @@ namespace Hydro
 		std::string Name;
 		HY_PROPERTY(Asset(Definition, DialogueDefinition), Tooltip("What they say when the player talks to them"))
 		AssetHandle Dialogue = 0;
+		HY_PROPERTY(
+		    Asset(Definition, InventoryDefinition),
+		    Tooltip("What this NPC sells (0: not a merchant)"))
+		AssetHandle Shop = 0;
 	};
 
 	HY_DATA(Table)

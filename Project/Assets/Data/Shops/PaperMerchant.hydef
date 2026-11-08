@@ -1,0 +1,11 @@
+Handle: 6427387197889945485
+Definition:
+  Version: 1
+  Type: InventoryDefinition
+  Values:
+    Items:
+      - Item: {Table: 4741649512266718899, Row: Potion}
+        Count: 5
+      - Item: {Table: 4741649512266718899, Row: HiPotion}
+        Count: 5
+    Money: 0

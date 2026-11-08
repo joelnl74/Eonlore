@@ -180,6 +180,12 @@ namespace Hydro
 			m_Claimed.erase(std::remove(m_Claimed.begin(), m_Claimed.end(), npc), m_Claimed.end());
 		}
 
+		// True when a quest speaks for this NPC (Claimed, not released). Unlike Talk, it remembers nothing.
+		bool IsClaimed(const std::string& npc) const
+		{
+			return std::find(m_Claimed.begin(), m_Claimed.end(), npc) != m_Claimed.end();
+		}
+
 		bool Talk(const std::string& npc)
 		{
 			if (std::find(m_Claimed.begin(), m_Claimed.end(), npc) == m_Claimed.end())
